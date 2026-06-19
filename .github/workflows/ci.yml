@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/backend
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: crs
+          POSTGRES_PASSWORD: crs
+          POSTGRES_DB: crs_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U crs"
+          --health-interval 5s --health-timeout 3s --health-retries 10
+    env:
+      CRS_TEST_PG_URL: postgresql+psycopg://crs:crs@localhost:5432/crs_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: pip install -e ".[dev]"
+      - run: ruff check app tests scripts
+      - run: black --check app tests scripts
+      - run: mypy app
+      - run: pytest
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run build
