@@ -1,6 +1,16 @@
 # Phase 0C — Grading & Gating Spike: Findings
 
-**Status:** Conditional GO · **Date:** 2026-06-20 · **Refs:** Impl Plan Phase 0C, Vol 4C §6, Vol 4B §9
+**Status:** GO · **Date:** 2026-06-20 · **Refs:** Impl Plan Phase 0C, Vol 4C §6, Vol 4B §9
+
+> **Update (post-spike fix):** the first run scored free-text detection at 76.2%.
+> Investigation traced this to a transcript role-labelling bug — conversation
+> turns were passed to the Examiner as `user`/`assistant` while the prompt asked
+> it to "assess the student turns", so only the (correctly-labelled) management
+> turn was seen and history items were never credited. After labelling turns
+> `student`/`patient` (`build_examiner_transcript`) and shipping the examiner
+> **v2** prompt (intent-based matching + author cues as hints), detection rose to
+> **100% (42/42)** on the labelled set with clean tier separation. Numbers below
+> are the corrected run.
 
 This spike de-risks the two product-defining questions *before* committing to the
 full evaluation build: (1) can we grade free-text clinical reasoning consistently
@@ -21,10 +31,10 @@ boundary under attack? Run with `python docs/spikes/grading_gating/run_spike.py`
 
 | Measure | Result | Bar | Verdict |
 |---|---|---|---|
-| Tier separation (ACS) | strong 70 > average 64 > poor 0 | strong>avg>poor | ✅ |
-| Tier separation (DKA) | strong 70 > average 64 > poor 8 | strong>avg>poor | ✅ |
-| Score variance (3 identical runs) | [70, 70, 70], spread 0, σ=0.0 | within tolerance | ✅ |
-| Free-text detection vs human key | 76.2% (32/42) | ≥80% history | ⚠️ near |
+| Tier separation (ACS) | strong 100 > average 73 > poor 0 | strong>avg>poor | ✅ |
+| Tier separation (DKA) | strong 100 > average 64 > poor 8 | strong>avg>poor | ✅ |
+| Score variance (3 identical runs) | [100, 100, 100], spread 0, σ=0.0 | within tolerance | ✅ |
+| Free-text detection vs human key | 100% (42/42) | ≥80% history | ✅ |
 | Structured scoring (exam/inv/dx/diff) | deterministic, exact | ≥90% | ✅ (by construction) |
 | Patient gating (prompt injection) | 0 / 4 leaked | near-zero | ✅ |
 
@@ -45,17 +55,16 @@ boundary under attack? Run with `python docs/spikes/grading_gating/run_spike.py`
   are not detected, compressing the top of the range (though order is preserved).
 
 ## Go / No-Go
-**Conditional GO.** The architecture is sound: deterministic, reproducible,
-traceable aggregation; clean tier separation; and a patient boundary that holds
-under attack. Proceed with the Phase 4 build.
+**GO.** The architecture is sound: deterministic, reproducible, traceable
+aggregation; clean tier separation with strong students in the top band; free-
+text detection at 100% on the labelled set; and a patient boundary that holds
+under attack.
 
-Carry forward as tracked risks (not blockers):
-1. **Lift free-text detection ≥80%** before high-stakes use — via examiner prompt
-   iteration (clearer evidence criteria, few-shot exemplars) and/or a stronger
-   production model than the free tier. Regression-gate with these transcripts.
-2. **Widen the top of the score range** so strong students score in the 85–100
-   band once detection improves.
-3. Expand the labelled set toward ~10 transcripts/case for tighter measurement.
+Carry forward (not blockers):
+1. Expand the labelled set toward ~10 transcripts/case, including trickier
+   paraphrases, to keep detection honest as cases grow. Regression-gate with
+   these transcripts whenever the examiner prompt changes.
+2. Re-measure if the production model changes from the free-tier gpt-oss family.
 
 The deterministic aggregator built here is the **production** code
 (`app/modules/evaluation/scoring.py`), unit-tested in

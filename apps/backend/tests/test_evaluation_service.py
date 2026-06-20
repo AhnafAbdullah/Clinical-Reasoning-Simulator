@@ -35,10 +35,10 @@ def _examiner_responder(satisfied_ids: set[str]):
 
     def responder(request: LLMRequest) -> str:
         # Pull the rubric item ids out of the rendered system prompt.
+        import re
+
         system = request.messages[0].content
-        ids = [
-            line.split("id: ")[1].split(" ")[0] for line in system.splitlines() if "id: " in line
-        ]
+        ids = re.findall(r"^- id: (\S+)", system, flags=re.MULTILINE)
         return json.dumps(
             {"items": [{"id": i, "satisfied": i in satisfied_ids, "evidence": "x"} for i in ids]}
         )

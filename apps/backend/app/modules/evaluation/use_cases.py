@@ -12,7 +12,7 @@ import json
 import re
 from typing import Any
 
-from app.domain.ai import ChatMessage
+from app.domain.ai import ChatMessage, ChatRole
 from app.modules.ai.aios import AIOS
 from app.modules.evaluation.scoring import EvaluationResult, ItemDetection, aggregate
 
@@ -22,12 +22,20 @@ EXAMINER_AGENT = "examiner"
 _FREE_TEXT_SECTIONS = ("history", "communication", "treatment")
 
 
-def collect_free_text_items(case_json: dict) -> list[dict[str, str]]:
+def collect_free_text_items(case_json: dict) -> list[dict[str, Any]]:
+    """Free-text rubric items for the Examiner, including the author's detection
+    cues as recall hints (used by examiner_v2 to match intent, not keywords)."""
     rubric = case_json.get("rubric", {})
-    items: list[dict[str, str]] = []
+    items: list[dict[str, Any]] = []
     for section in _FREE_TEXT_SECTIONS:
         for item in rubric.get(section, {}).get("items", []) or []:
-            items.append({"id": item["id"], "description": item.get("description", "")})
+            items.append(
+                {
+                    "id": item["id"],
+                    "description": item.get("description", ""),
+                    "cues": item.get("detection_cues", []) or [],
+                }
+            )
     return items
 
 
@@ -35,8 +43,17 @@ def build_examiner_transcript(
     conversation: list[ChatMessage], *, management_plan: str | None
 ) -> list[dict[str, str]]:
     """The Examiner sees the consultation plus the student's written management
-    plan (so treatment items are detectable from one transcript)."""
-    turns = [{"role": m.role.value, "content": m.content} for m in conversation]
+    plan (so treatment items are detectable from one transcript).
+
+    Turns are labelled student/patient (not the provider-level user/assistant) so
+    the prompt's "assess the student turns" instruction lines up with the data."""
+    turns = [
+        {
+            "role": "student" if m.role == ChatRole.USER else "patient",
+            "content": m.content,
+        }
+        for m in conversation
+    ]
     if management_plan:
         turns.append({"role": "student", "content": f"Management plan: {management_plan}"})
     return turns
