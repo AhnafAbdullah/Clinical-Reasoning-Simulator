@@ -11,6 +11,7 @@ from app.api.skeleton import router as skeleton_router
 from app.core.config import get_settings
 from app.core.db import engine
 from app.core.logging import configure_logging
+from app.modules.analytics.router import router as analytics_router
 from app.modules.auth.router import router as auth_router
 from app.modules.cases.router import router as cases_router
 from app.modules.commitments.router import router as commitments_router
@@ -41,6 +42,7 @@ app.include_router(conversation_router)
 app.include_router(commitments_router)
 app.include_router(investigations_catalog_router)
 app.include_router(investigations_session_router)
+app.include_router(analytics_router)
 app.include_router(skeleton_router)
 
 

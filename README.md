@@ -48,12 +48,17 @@ docs/adr         architecture decision records
   evaluation endpoint. A second hand-authored Advanced case (DKA) ships with it.
   Examiner free-text detection lifted to 100% on the labelled spike set
   (examiner v2; transcript role-label fix).
-- **Phase 5** (frontend) — in progress: typed API client + authenticated SSE,
-  auth screens, dashboard (cases by difficulty + resume sessions), and the
+- **Phase 5** (frontend) — done: the [`@crs/sdk`](packages/sdk) typed client
+  (envelope + auth refresh + authenticated SSE), auth screens, dashboard (cases
+  by difficulty, resume sessions, performance summary), case-detail page, the
   3-panel session view (streaming patient chat · workspace: physical exam,
-  investigations, ordered commitments · consultant evaluation). Verified live
-  end-to-end against OpenRouter: a full ACS playthrough scores 100 and the
-  session completes.
+  investigations, ordered commitments · consultant evaluation), an analytics
+  screen (`GET /users/me/analytics`), and skeleton-loader / a11y polish.
+  Verified live end-to-end against OpenRouter: a full ACS playthrough scores 100
+  and the session completes.
+- **Containerized:** `docker compose -f infrastructure/docker/docker-compose.yml
+  up --build` runs the whole stack behind nginx and auto-migrates + seeds — see
+  [`RUNNING.md`](RUNNING.md).
 
 ## Quick start
 ```bash

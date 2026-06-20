@@ -79,22 +79,30 @@ Open <http://localhost:3000>, register an account, pick a case, and start.
 
 ---
 
-## 2B. Docker Compose (full stack behind nginx)
+## 2B. Docker Compose (full stack behind nginx) — one command
+
+Put your key in `apps/backend/.env` (step 1), then:
 
 ```bash
-docker compose -f infrastructure/docker/docker-compose.yml up -d --build
+docker compose -f infrastructure/docker/docker-compose.yml up --build
 ```
 
-This builds and runs backend, frontend, postgres, redis and nginx. The app is
-served at <http://localhost>. After the first start, run migrations + seed once:
+That's it. This builds and runs **postgres, redis, backend, frontend and nginx**.
+On startup the backend automatically **applies migrations and seeds** the example
+cases (idempotent), so there are no manual follow-up steps. Open the app at
+<http://localhost>.
 
-```bash
-docker compose -f infrastructure/docker/docker-compose.yml exec backend alembic upgrade head
-docker compose -f infrastructure/docker/docker-compose.yml exec backend python -m scripts.seed
-```
-
-(Ensure `CRS_OPENROUTER_API_KEY` is set in the backend's environment — via
-`apps/backend/.env` or the compose file.)
+Notes:
+- The backend reads `apps/backend/.env` (via compose `env_file`) for
+  `CRS_OPENROUTER_API_KEY` and any overrides; `CRS_DATABASE_URL` and
+  `CRS_REDIS_URL` are set to the in-network services automatically.
+- The frontend is built with `NEXT_PUBLIC_API_BASE=/` so the browser calls the
+  API same-origin through nginx.
+- Stop with `docker compose -f infrastructure/docker/docker-compose.yml down`
+  (add `-v` to also drop the database volume).
+- **Needs free disk space** for the image build — if `docker build` fails with
+  `input/output error` writing containerd/buildkit metadata, your Docker disk is
+  full; free space (or `docker system prune`) and retry.
 
 ---
 

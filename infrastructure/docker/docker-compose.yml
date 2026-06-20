@@ -32,8 +32,13 @@ services:
     build:
       context: ../..
       dockerfile: apps/backend/Dockerfile
+    # Provider key (and any overrides) come from apps/backend/.env if present.
+    env_file:
+      - path: ../../apps/backend/.env
+        required: false
     environment:
       CRS_DATABASE_URL: postgresql+psycopg://crs:crs@postgres:5432/crs
+      CRS_REDIS_URL: redis://redis:6379/0
     depends_on:
       postgres:
         condition: service_healthy
@@ -44,9 +49,11 @@ services:
 
   frontend:
     build:
-      context: ../../apps/frontend
-    environment:
-      NEXT_PUBLIC_API_BASE: /
+      context: ../..
+      dockerfile: apps/frontend/Dockerfile
+      args:
+        # Same-origin behind nginx; the browser calls /api/... on its own host.
+        NEXT_PUBLIC_API_BASE: /
     depends_on:
       - backend
     expose:

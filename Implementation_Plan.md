@@ -167,7 +167,7 @@ This is the single most important risk. *Do not skip.*
 
 ---
 
-### Phase 5 — Frontend  ⏱ ~2.5 weeks — 🚧 IN PROGRESS
+### Phase 5 — Frontend  ⏱ ~2.5 weeks — ✅ DONE (+ full-stack containerized, one-command run)
 **Goal:** the immersive EMR-like experience (Vol 6).
 
 **Tasks**
