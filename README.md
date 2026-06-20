@@ -20,7 +20,13 @@ docs/adr         architecture decision records
   frontend skeleton, and a streaming "walking skeleton" (`/api/v1/_skeleton`).
 - **Phase 1** (domain & data) — done: entities, full schema, immutable cases
   (hash + Postgres trigger), repositories, case JSON Schema, seed. Verified on
-  Postgres (`pytest` 24 passing incl. trigger tests).
+  Postgres (`pytest` passing incl. trigger tests).
+- **Phase 2** (AIOS) — done: the AI Operating System every agent goes through —
+  OpenRouter provider adapter, versioned prompt registry + Jinja2 renderer with
+  enforced knowledge boundaries, Context Builder, Memory Manager, Model Router,
+  hot-path Validator, Retry Manager, and a Redis-buffered resumable Stream
+  Manager, with per-call metrics + audit. Provider key wired server-side; the
+  whole subsystem is testable without a live LLM (fake provider).
 
 ## Quick start
 ```bash

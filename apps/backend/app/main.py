@@ -31,15 +31,37 @@ def health() -> dict[str, str]:
 
 
 @app.get("/ready")
-def ready() -> dict[str, object]:
-    """Readiness probe. Phase 1 checks the database; Redis and the AI provider
-    are wired in later phases (Vol 5 §20)."""
+async def ready() -> dict[str, object]:
+    """Readiness probe: database, Redis, and the AI provider (Vol 5 §20)."""
+    settings = get_settings()
     checks: dict[str, str] = {}
+
     try:
         with engine.connect() as conn:
             conn.execute(text("SELECT 1"))
         checks["database"] = "ok"
     except Exception as exc:  # pragma: no cover - exercised in integration
         checks["database"] = f"error: {exc.__class__.__name__}"
-    ready = all(v == "ok" for v in checks.values())
+
+    try:
+        import redis.asyncio as redis
+
+        client = redis.from_url(settings.redis_url)
+        await client.ping()
+        await client.aclose()
+        checks["redis"] = "ok"
+    except Exception as exc:  # pragma: no cover - exercised in integration
+        checks["redis"] = f"error: {exc.__class__.__name__}"
+
+    if settings.openrouter_api_key:
+        try:
+            from app.infrastructure.ai.openrouter import OpenRouterProvider
+
+            checks["ai_provider"] = "ok" if await OpenRouterProvider().health_check() else "error"
+        except Exception as exc:  # pragma: no cover
+            checks["ai_provider"] = f"error: {exc.__class__.__name__}"
+    else:
+        checks["ai_provider"] = "unconfigured"
+
+    ready = all(v in ("ok", "unconfigured") for v in checks.values())
     return {"ready": ready, "checks": checks}
