@@ -5,6 +5,7 @@ realistic, reproducible patient encounters with rubric-anchored consultant feedb
 
 See [`Documentation/`](Documentation) for the design volumes and
 [`Implementation_Plan.md`](Implementation_Plan.md) for the build plan.
+**To run the app, see [`RUNNING.md`](RUNNING.md).**
 
 ## Monorepo
 ```
@@ -45,6 +46,14 @@ docs/adr         architecture decision records
   aggregation** into section/overall/differential/efficiency scores) writing a
   write-once, provenance-stamped evaluation and a consultant report; the
   evaluation endpoint. A second hand-authored Advanced case (DKA) ships with it.
+  Examiner free-text detection lifted to 100% on the labelled spike set
+  (examiner v2; transcript role-label fix).
+- **Phase 5** (frontend) — in progress: typed API client + authenticated SSE,
+  auth screens, dashboard (cases by difficulty + resume sessions), and the
+  3-panel session view (streaming patient chat · workspace: physical exam,
+  investigations, ordered commitments · consultant evaluation). Verified live
+  end-to-end against OpenRouter: a full ACS playthrough scores 100 and the
+  session completes.
 
 ## Quick start
 ```bash
