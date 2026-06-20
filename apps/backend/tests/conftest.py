@@ -91,3 +91,85 @@ class FakeProvider:
 @pytest.fixture
 def fake_provider_cls() -> type[FakeProvider]:
     return FakeProvider
+
+
+# ── HTTP integration harness ─────────────────────────────────────────────────────
+
+
+class _NoLimit:
+    """Rate limiter stub used in tests (always allows)."""
+
+    async def check(self, *args: object, **kwargs: object) -> None:
+        return None
+
+
+@pytest.fixture
+def client(session, monkeypatch):
+    """A TestClient wired to the in-memory DB, a fake-backed AIOS (real prompt
+    rendering), an in-memory stream buffer, and a no-op rate limiter."""
+    from contextlib import contextmanager
+
+    from fastapi.testclient import TestClient
+
+    from app.api import deps
+    from app.main import app
+    from app.modules.ai.aios import AIOS
+    from app.modules.ai.buffer import InMemoryGenerationBuffer
+    from app.modules.ai.stream_manager import StreamManager
+
+    buffer = InMemoryGenerationBuffer()
+    stream_manager = StreamManager(buffer)
+    aios = AIOS(FakeProvider("I have had this chest pain for about two hours now."))
+
+    @contextmanager
+    def _test_scope():
+        # Background persistence (conversation service) writes to the test session.
+        yield session
+
+    monkeypatch.setattr("app.modules.conversation.service.session_scope", _test_scope)
+
+    def _db_dep():
+        yield session
+
+    app.dependency_overrides[deps.get_db] = _db_dep
+    app.dependency_overrides[deps.get_aios] = lambda: aios
+    app.dependency_overrides[deps.get_stream_manager] = lambda: stream_manager
+    app.dependency_overrides[deps.get_rate_limiter] = _NoLimit
+    test_client = TestClient(app)
+    test_client.buffer = buffer  # type: ignore[attr-defined]  # for assertions
+    try:
+        yield test_client
+    finally:
+        app.dependency_overrides.clear()
+
+
+@pytest.fixture
+def auth_headers(client) -> dict[str, str]:
+    """Register a student and return Authorization headers for them."""
+    resp = client.post(
+        "/api/v1/auth/register",
+        json={"email": "student@example.com", "password": "supersecret123"},
+    )
+    assert resp.status_code == 201, resp.text
+    token = resp.json()["data"]["access_token"]
+    return {"Authorization": f"Bearer {token}"}
+
+
+@pytest.fixture
+def published_case_id(session, sample_case):
+    """Seed the sample case as a Published case in the test DB; return its id."""
+    from app.domain.enums import Difficulty
+    from app.infrastructure.repositories.case_repository import SqlAlchemyCaseRepository
+    from app.modules.cases.use_cases import create_draft_case, publish_case
+
+    repo = SqlAlchemyCaseRepository(session)
+    meta = sample_case["metadata"]
+    draft = create_draft_case(
+        repo,
+        title=meta["title"],
+        difficulty=Difficulty(meta["difficulty"]),
+        specialty=meta["specialty"],
+        json_content=sample_case,
+    )
+    published = publish_case(repo, draft.id, reviewed_by="Dr. Test", reviewer_credentials="MBBS")
+    return published.id

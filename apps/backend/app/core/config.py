@@ -60,6 +60,24 @@ class Settings(BaseSettings):
     llm_max_retries: int = 2
     llm_backoff_base_seconds: float = 0.5
 
+    # ── Auth / JWT (Vol 5 §5) ──────────────────────────────────────────────────
+    # Short-lived access token + rotating refresh token (Argon2 password hashing).
+    # >= 32 bytes so HS256 is happy; override in every real environment.
+    jwt_secret: str = "dev-insecure-secret-change-me-in-production-0123456789"
+    jwt_algorithm: str = "HS256"
+    access_token_ttl_minutes: int = 15
+    refresh_token_ttl_days: int = 14
+    # Google OAuth (behind enable_google_login). Server-side only.
+    google_client_id: str = ""
+    google_client_secret: str = ""
+
+    # ── Rate limiting (Vol 5 §24) — Redis-backed, per-user/per-action ──────────
+    rate_limit_enabled: bool = True
+    rate_limit_messages_per_minute: int = 20
+    rate_limit_sessions_per_hour: int = 30
+    rate_limit_investigations_per_minute: int = 30
+    rate_limit_login_per_minute: int = 10
+
     # Feature flags (Vol 2B §31-32).
     enable_streaming: bool = True
     enable_google_login: bool = False

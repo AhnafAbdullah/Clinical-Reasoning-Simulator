@@ -10,3 +10,4 @@ Decision → Consequences. Supersede rather than edit once "Accepted".
 - [ADR-005](0005-tanstack-query.md) — TanStack Query for server state
 - [ADR-006](0006-versioned-prompt-templates.md) — Versioned prompt templates (supersedes PDL)
 - [ADR-007](0007-modular-monolith.md) — Feature-first modular monolith
+- [ADR-008](0008-jwt-auth-and-response-envelope.md) — JWT auth (refresh rotation) + response envelope

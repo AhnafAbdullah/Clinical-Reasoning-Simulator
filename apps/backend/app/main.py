@@ -6,10 +6,19 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 
+from app.api.errors import register_exception_handlers
 from app.api.skeleton import router as skeleton_router
 from app.core.config import get_settings
 from app.core.db import engine
 from app.core.logging import configure_logging
+from app.modules.auth.router import router as auth_router
+from app.modules.cases.router import router as cases_router
+from app.modules.conversation.router import router as conversation_router
+from app.modules.investigations.router import (
+    catalog_router as investigations_catalog_router,
+    session_router as investigations_session_router,
+)
+from app.modules.sessions.router import router as sessions_router
 
 configure_logging()
 
@@ -21,6 +30,15 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+register_exception_handlers(app)
+
+app.include_router(auth_router)
+app.include_router(cases_router)
+app.include_router(sessions_router)
+app.include_router(conversation_router)
+app.include_router(investigations_catalog_router)
+app.include_router(investigations_session_router)
 app.include_router(skeleton_router)
 
 

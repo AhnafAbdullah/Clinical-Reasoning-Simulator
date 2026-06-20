@@ -62,6 +62,19 @@ class StreamManager:
             raise
         return "".join(parts)
 
+    async def stream_text(self, message_id: str, text: str) -> None:
+        """Emit an already-decided response into the buffer word-by-word.
+
+        Per Vol 4A §16 the business decision (generation + validation) completes
+        before streaming; this only *delivers* the settled tokens, which keeps
+        validation off the token path and makes the stream trivially resumable."""
+        for word in text.split(" "):
+            await self.buffer.append_token(message_id, word + " ")
+        await self.buffer.complete(message_id)
+
+    async def fail(self, message_id: str, error: str) -> None:
+        await self.buffer.fail(message_id, error)
+
     async def sse(self, message_id: str, after_seq: int = -1) -> AsyncIterator[str]:
         """Yield SSE strings for a message, resumable from ``after_seq``."""
         async for event in self.buffer.subscribe(message_id, after_seq):

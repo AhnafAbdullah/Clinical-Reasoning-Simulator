@@ -77,7 +77,9 @@ async def test_live_generate_smoke() -> None:
         LLMRequest(
             model=Settings().model_latency,  # type: ignore[call-arg]
             messages=[ChatMessage(ChatRole.USER, "Reply with the single word: pong")],
-            max_tokens=8,
+            # Reasoning-capable free models spend tokens thinking before emitting
+            # content; too small a budget yields empty content. Keep this realistic.
+            max_tokens=256,
         )
     )
     assert response.text

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import uuid
 
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.domain.entities import ClinicalSession
@@ -58,3 +59,23 @@ class SqlAlchemySessionRepository:
         _apply(row, clinical_session)
         self._s.flush()
         return _to_domain(row)
+
+    def list_for_user(
+        self, user_id: uuid.UUID, *, limit: int = 50, offset: int = 0
+    ) -> list[ClinicalSession]:
+        stmt = (
+            select(m.ClinicalSession)
+            .where(m.ClinicalSession.user_id == user_id)
+            .order_by(m.ClinicalSession.started_at.desc())
+            .limit(limit)
+            .offset(offset)
+        )
+        return [_to_domain(r) for r in self._s.scalars(stmt)]
+
+    def count_for_user(self, user_id: uuid.UUID) -> int:
+        stmt = (
+            select(func.count())
+            .select_from(m.ClinicalSession)
+            .where(m.ClinicalSession.user_id == user_id)
+        )
+        return int(self._s.scalar(stmt) or 0)

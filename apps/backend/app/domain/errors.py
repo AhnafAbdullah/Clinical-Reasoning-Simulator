@@ -23,6 +23,44 @@ class InvalidStateTransition(DomainError):
     """Attempted an illegal session state/stage transition."""
 
 
+# ── Auth & access errors (Vol 5 §5/§7) ─────────────────────────────────────────
+
+
+class AuthError(DomainError):
+    """Base class for authentication/authorization failures."""
+
+
+class InvalidCredentialsError(AuthError):
+    """Email/password or token did not authenticate."""
+
+
+class EmailAlreadyRegisteredError(AuthError):
+    """Registration attempted with an email that already exists."""
+
+
+class TokenError(AuthError):
+    """A JWT or refresh token was missing, malformed, expired, or revoked."""
+
+
+class PermissionDeniedError(AuthError):
+    """Authenticated principal lacks the required role/ownership."""
+
+
+# ── Session / workflow errors (Vol 4D, Vol 5 §7) ───────────────────────────────
+
+
+class NotFoundError(DomainError):
+    """A requested resource does not exist (maps to 404 / NOT_FOUND)."""
+
+
+class RateLimitedError(DomainError):
+    """A rate limit was exceeded (maps to 429 / RATE_LIMITED)."""
+
+
+class SessionCompletedError(DomainError):
+    """An action was attempted on a session that is no longer ACTIVE."""
+
+
 # ── AI subsystem errors (Vol 4A/4B) ────────────────────────────────────────────
 
 

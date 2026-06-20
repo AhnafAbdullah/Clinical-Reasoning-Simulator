@@ -27,6 +27,14 @@ docs/adr         architecture decision records
   hot-path Validator, Retry Manager, and a Redis-buffered resumable Stream
   Manager, with per-call metrics + audit. Provider key wired server-side; the
   whole subsystem is testable without a live LLM (fake provider).
+- **Phase 3** (session & conversation) — done: JWT auth (Argon2, refresh
+  rotation, Student/Admin roles), the session state machine (open working phase
+  → ordered commitment points), session init, the conversation workflow (202 +
+  `message_id`, Patient Agent via AIOS, *decide-then-stream* over the resumable
+  SSE buffer), structured physical examination, three-outcome investigation
+  ordering, case browsing (metadata only), Redis rate limiting, and a standard
+  response envelope. Verified live against OpenRouter: the patient stays in
+  character and refuses to leak the diagnosis under prompt injection.
 
 ## Quick start
 ```bash

@@ -28,6 +28,7 @@ from app.domain.enums import (
     InvestigationOutcome,
     MessageRole,
     SessionStatus,
+    UserRole,
 )
 from app.infrastructure.db.base import Base, JSONType
 from sqlalchemy import Uuid
@@ -57,6 +58,9 @@ class User(Base):
     email: Mapped[str] = mapped_column(String(320), unique=True, nullable=False)
     password_hash: Mapped[str | None] = mapped_column(String(255))
     google_id: Mapped[str | None] = mapped_column(String(255), unique=True)
+    role: Mapped[UserRole] = mapped_column(
+        _enum(UserRole), nullable=False, default=UserRole.STUDENT
+    )
     display_name: Mapped[str | None] = mapped_column(String(255))
     profile_picture: Mapped[str | None] = mapped_column(String(1024))
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
@@ -147,6 +151,21 @@ class ConversationMessage(Base):
     timestamp: Mapped[datetime] = mapped_column(_TS, server_default=func.now(), nullable=False)
 
     session: Mapped[ClinicalSession] = relationship(back_populates="conversation")
+
+
+class PhysicalExamRequest(Base):
+    """Records that a student examined a body system (findings come from the case
+    JSON, not from this row). Persisted so the examiner can later credit the
+    physical-exam rubric (Vol 4D §8)."""
+
+    __tablename__ = "physical_exam_requests"
+
+    id: Mapped[uuid.UUID] = _pk()
+    session_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("clinical_sessions.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    system: Mapped[str] = mapped_column(String(64), nullable=False)
+    requested_at: Mapped[datetime] = mapped_column(_TS, server_default=func.now(), nullable=False)
 
 
 class InvestigationOrder(Base):

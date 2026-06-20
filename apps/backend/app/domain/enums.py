@@ -5,6 +5,13 @@ from __future__ import annotations
 from enum import Enum
 
 
+class UserRole(str, Enum):
+    """Application roles (Vol 5 §8 / Implementation Plan Phase 3). Faculty reserved."""
+
+    STUDENT = "Student"
+    ADMIN = "Admin"
+
+
 class Difficulty(str, Enum):
     BASIC = "Basic"
     INTERMEDIATE = "Intermediate"
