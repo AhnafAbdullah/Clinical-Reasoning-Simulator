@@ -71,8 +71,10 @@ def submit_management(
     session.submit_management()  # ACTIVE -> EVALUATING
     SqlAlchemySubmissionRepository(db).save_treatment(session.id, body.plan)
     sessions.update(session)
-    # Runs after the response (and after this request's transaction commits), so
-    # the worker reads a fully-persisted session.
+    # Commit now so the background worker (which Starlette may start before this
+    # request's yield-dependency commits) reads the fully-persisted EVALUATING
+    # session and the management plan.
+    db.commit()
     background.add_task(EvaluationService(aios).run, session.id)
     return ok({"status": session.status.value})
 

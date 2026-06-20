@@ -71,11 +71,16 @@ class RedisGenerationBuffer:
         await self._emit(message_id, ERROR, {"error": error})
 
     async def snapshot(self, message_id: str, after_seq: int = -1) -> list[BufferedEvent]:
-        raw = await self._redis.lrange(self._events_key(message_id), after_seq + 1, -1)
+        start = after_seq + 1
+        raw = await self._redis.lrange(self._events_key(message_id), start, -1)
         events: list[BufferedEvent] = []
-        for item in raw:
+        for offset, item in enumerate(raw):
             obj = json.loads(item)
-            events.append(BufferedEvent(seq=obj["seq"], type=obj["type"], data=obj["data"]))
+            # An event is rpush'd then lset with its seq; tolerate the brief window
+            # where a concurrent reader sees the entry before the seq is written by
+            # deriving it from the list position.
+            seq = obj.get("seq", start + offset)
+            events.append(BufferedEvent(seq=seq, type=obj["type"], data=obj["data"]))
         return events
 
     async def subscribe(self, message_id: str, after_seq: int = -1) -> AsyncIterator[BufferedEvent]:

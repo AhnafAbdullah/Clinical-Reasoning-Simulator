@@ -12,6 +12,7 @@ import logging
 import uuid
 
 from app.core.db import session_scope
+from app.domain.enums import SessionStatus
 from app.infrastructure.repositories.case_repository import SqlAlchemyCaseRepository
 from app.infrastructure.repositories.conversation_repository import (
     SqlAlchemyConversationRepository,
@@ -45,10 +46,29 @@ class EvaluationService:
         _background_tasks.add(task)
         task.add_done_callback(_background_tasks.discard)
 
+    async def _await_ready(self, session_id: uuid.UUID, *, attempts: int = 20) -> bool:
+        """Poll until the session is visibly EVALUATING (the triggering commit has
+        landed), or give up. Returns True when ready."""
+        for _ in range(attempts):
+            with session_scope() as db:
+                session = SqlAlchemySessionRepository(db).get(session_id)
+                if session is not None and session.status == SessionStatus.EVALUATING:
+                    return True
+            await asyncio.sleep(0.25)
+        logger.warning("Session %s never became EVALUATING; skipping evaluation", session_id)
+        return False
+
     async def run(self, session_id: uuid.UUID) -> None:
         """Gather inputs, run the Examiner pass, aggregate, persist write-once,
         then transition the session to COMPLETED."""
         try:
+            # The triggering request (sync endpoint) commits the EVALUATING status
+            # and the management plan in its own transaction; this async task can
+            # be scheduled before that commit is visible. Wait for it so we read a
+            # complete, committed snapshot (incl. the treatment submission).
+            if not await self._await_ready(session_id):
+                return
+
             with session_scope() as db:
                 session = SqlAlchemySessionRepository(db).get(session_id)
                 if session is None:
@@ -114,10 +134,19 @@ class EvaluationService:
                     rubric_version=rubric_version,
                     feedback=feedback,
                 )
+                # Transition only when the session is genuinely awaiting evaluation.
+                # Guarding here means an unexpected status can never roll back the
+                # evaluation we just wrote (the score is the valuable artifact).
                 srepo = SqlAlchemySessionRepository(db)
                 session = srepo.get(session_id)
-                if session is not None:
+                if session is not None and session.status == SessionStatus.EVALUATING:
                     session.complete()  # EVALUATING -> COMPLETED
                     srepo.update(session)
+                elif session is not None:
+                    logger.warning(
+                        "Evaluation saved for session %s but status was %s, not EVALUATING",
+                        session_id,
+                        session.status.value,
+                    )
         except Exception:  # evaluation must not crash the worker pool
             logger.exception("Evaluation failed for session %s", session_id)
