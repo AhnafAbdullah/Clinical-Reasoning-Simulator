@@ -127,6 +127,8 @@ def client(session, monkeypatch):
         yield session
 
     monkeypatch.setattr("app.modules.conversation.service.session_scope", _test_scope)
+    # The evaluation worker also persists from a background task.
+    monkeypatch.setattr("app.modules.evaluation.service.session_scope", _test_scope)
 
     def _db_dep():
         yield session

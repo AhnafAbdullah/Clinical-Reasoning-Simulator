@@ -76,7 +76,7 @@ apps/backend/app/
 **0B. Walking skeleton (thin vertical slice)**
 - [ ] One use case end-to-end: a stub "echo patient" — `POST /sessions/{id}/messages` → OpenRouter call → SSE stream → rendered in a minimal page. No real case logic yet; proves the streaming/correlation-id plumbing (Vol 5 §12–13).
 
-**0C. 🔴 Critical spike — grading & gating (throwaway, time-boxed)**
+**0C. 🔴 Critical spike — grading & gating (throwaway, time-boxed)** — ✅ DONE (conditional GO; see `docs/spikes/grading_gating/FINDINGS.md`).
 This is the single most important risk. *Do not skip.*
 - [ ] Hand-author **2 full case JSONs** (1 Basic, 1 Advanced) including a real, itemised rubric (Vol 3 §18 schema).
 - [ ] Build a minimal **Examiner harness** offline: feed a transcript + rubric → LLM detects which items are satisfied + evidence span → software aggregates score (Vol 4C "Scoring mechanism", Vol 3 §18).
@@ -151,7 +151,7 @@ This is the single most important risk. *Do not skip.*
 
 ---
 
-### Phase 4 — Commitments & Evaluation  ⏱ ~2 weeks
+### Phase 4 — Commitments & Evaluation  ⏱ ~2 weeks — ✅ DONE
 **Goal:** close the loop with differential → diagnosis → management → consultant report.
 
 **Tasks**

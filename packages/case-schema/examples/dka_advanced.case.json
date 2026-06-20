@@ -1,0 +1,304 @@
+{
+  "metadata": {
+    "case_id": "dka-young-t1dm-advanced",
+    "title": "Vomiting and abdominal pain in a 22-year-old with type 1 diabetes",
+    "difficulty": "Advanced",
+    "specialty": "Internal Medicine",
+    "estimated_time": 30,
+    "author": "seed",
+    "schema_version": 1,
+    "reviewed_by": "Dr. A. Reviewer",
+    "reviewer_credentials": "MBBS, FCPS (Medicine)",
+    "reviewed_at": "2026-06-20",
+    "medical_signoff": true
+  },
+  "patient": {
+    "name": "Sara Ahmed",
+    "age": 22,
+    "gender": "female",
+    "occupation": "University student",
+    "weight": 58,
+    "height": 165,
+    "ethnicity": "South Asian",
+    "personality": "Anxious, unwell, finds it hard to concentrate",
+    "communication_style": "Short answers, occasionally confused, breathing deeply"
+  },
+  "history": {
+    "chief_complaint": "Vomiting and tummy pain for a day, feeling very unwell",
+    "history_of_presenting_illness": {
+      "onset": "Symptoms began about 24 hours ago and have worsened",
+      "vomiting": "Several episodes, unable to keep fluids down",
+      "abdominal_pain": "Generalised, crampy, no specific site",
+      "thirst_and_urine": "Very thirsty, passing large amounts of urine for 3 days",
+      "breathing": "Feels short of breath and is breathing heavily",
+      "precipitant": "Had a sore throat and fever last week; missed several insulin doses because she felt too nauseated to eat",
+      "associated": "Drowsy, tired, mild blurring of vision"
+    },
+    "past_medical_history": ["Type 1 diabetes mellitus diagnosed age 14"],
+    "drug_history": ["Basal-bolus insulin (admits poor adherence this week)"],
+    "family_history": ["Mother has hypothyroidism"],
+    "social_history": ["Non-smoker", "No alcohol", "Lives in university accommodation"],
+    "review_of_systems": {
+      "genitourinary": "No dysuria, no frequency beyond the polyuria",
+      "gynaecological": "Last menstrual period 2 weeks ago, not sexually active"
+    }
+  },
+  "physical_exam": {
+    "general": { "appearance": "Drowsy, dehydrated, acetone smell on breath" },
+    "vitals": {
+      "blood_pressure": "102/64 mmHg",
+      "heart_rate": "118 bpm",
+      "respiratory_rate": "28/min, deep (Kussmaul)",
+      "temperature": "37.6 C",
+      "spo2": "98% on room air",
+      "gcs": "14/15 (E4 V4 M6)"
+    },
+    "cardiovascular": {
+      "pulse": "Tachycardic, thready",
+      "capillary_refill": "3 seconds",
+      "jvp": "Low",
+      "heart_sounds": "Normal"
+    },
+    "respiratory": { "auscultation": "Clear; deep sighing respiration" },
+    "abdomen": { "examination": "Generalised mild tenderness, no guarding, no rebound, bowel sounds present" },
+    "neurology": { "examination": "Drowsy but rousable, no focal deficit" },
+    "extremities": { "examination": "Dry mucous membranes, reduced skin turgor" }
+  },
+  "investigations": {
+    "laboratory": [
+      {
+        "name": "Capillary Blood Ketones",
+        "normal_range": "< 0.6 mmol/L",
+        "result": "5.8 mmol/L",
+        "interpretation": "Markedly elevated",
+        "clinical_significance": "Confirms significant ketonaemia",
+        "indicated": true
+      },
+      {
+        "name": "Venous Blood Gas",
+        "normal_range": "pH 7.35-7.45",
+        "result": "pH 7.12, HCO3 9 mmol/L, base excess -16",
+        "interpretation": "High anion gap metabolic acidosis",
+        "clinical_significance": "Confirms acidosis in DKA",
+        "indicated": true
+      },
+      {
+        "name": "Random Blood Glucose",
+        "normal_range": "< 140 mg/dL fasting",
+        "result": "428 mg/dL (23.8 mmol/L)",
+        "interpretation": "Hyperglycaemia",
+        "clinical_significance": "Supports DKA",
+        "indicated": true
+      },
+      {
+        "name": "Urea & Electrolytes",
+        "normal_range": "K 3.5-5.0 mmol/L",
+        "result": "K 5.4, Na 132, urea 9.1, creatinine 96",
+        "interpretation": "Pre-renal picture; potassium high-normal",
+        "clinical_significance": "Total body potassium is depleted despite the serum value; guides replacement",
+        "indicated": true
+      },
+      {
+        "name": "Complete Blood Count",
+        "normal_range": "WBC 4-11 x10^9/L",
+        "result": "WBC 14.2, Hb 14.8, Plt 290",
+        "interpretation": "Mild leucocytosis",
+        "clinical_significance": "Common in DKA; may reflect the precipitating infection",
+        "indicated": true
+      },
+      {
+        "name": "Urinalysis",
+        "normal_range": "Negative",
+        "result": "Ketones +++, glucose +++, no nitrites/leucocytes",
+        "interpretation": "Ketonuria and glycosuria",
+        "clinical_significance": "Supports DKA; no clear urinary source of infection",
+        "indicated": true
+      },
+      {
+        "name": "Serum Amylase",
+        "result": "Within normal limits",
+        "interpretation": "Normal",
+        "clinical_significance": "Abdominal pain is due to DKA, not pancreatitis",
+        "indicated": false,
+        "low_yield_response": "Within normal limits / non-contributory"
+      },
+      {
+        "name": "Thyroid Function Tests",
+        "result": "Within normal limits",
+        "interpretation": "Normal",
+        "clinical_significance": "Not contributory to the acute presentation",
+        "indicated": false,
+        "low_yield_response": "Within normal limits / non-contributory"
+      }
+    ],
+    "imaging": [
+      {
+        "name": "Chest X-Ray",
+        "result": "Clear lung fields, no consolidation",
+        "interpretation": "Normal",
+        "clinical_significance": "No pneumonia as a precipitant",
+        "indicated": true
+      }
+    ],
+    "bedside": [
+      {
+        "name": "ECG",
+        "result": "Sinus tachycardia, no peaked T waves",
+        "interpretation": "Sinus tachycardia",
+        "clinical_significance": "Baseline; monitors for hyperkalaemic changes during treatment",
+        "indicated": true
+      }
+    ]
+  },
+  "diagnosis": {
+    "final_diagnosis": "Diabetic ketoacidosis (DKA)",
+    "differentials": ["Hyperosmolar hyperglycaemic state", "Sepsis", "Gastroenteritis", "Acute abdomen (e.g. appendicitis)"],
+    "explanation": "Known type 1 diabetic with insulin omission and an intercurrent infection presenting with hyperglycaemia, ketonaemia and a high anion gap metabolic acidosis — the diagnostic triad of DKA. Kussmaul breathing, dehydration and abdominal pain are classic features."
+  },
+  "management": {
+    "emergency_management": [
+      "ABCDE assessment and large-bore IV access",
+      "IV fluid resuscitation with 0.9% sodium chloride",
+      "Fixed-rate intravenous insulin infusion (0.1 units/kg/hour)",
+      "Potassium replacement once K is known and urine output confirmed",
+      "Hourly glucose and ketone monitoring; continuous cardiac monitoring"
+    ],
+    "definitive_management": [
+      "Treat the precipitant (e.g. infection)",
+      "Continue insulin until ketones < 0.6 and acidosis resolved, then convert to subcutaneous insulin with overlap",
+      "Involve the diabetes specialist team"
+    ],
+    "follow_up": ["Diabetes education and adherence support", "Sick-day rules teaching"],
+    "patient_education": ["Never omit insulin even when not eating", "Recognise early DKA symptoms", "Sick-day management"]
+  },
+  "rubric": {
+    "history": {
+      "weight": 0.25,
+      "items": [
+        {
+          "id": "hpi_insulin_omission",
+          "description": "Elicited insulin omission / poor adherence",
+          "detection_cues": ["insulin", "miss", "skip", "doses", "adher", "take your"],
+          "weight": 2,
+          "required": true,
+          "red_flag": false
+        },
+        {
+          "id": "hpi_precipitant_infection",
+          "description": "Asked about a precipitating infection / illness",
+          "detection_cues": ["infection", "fever", "sore throat", "unwell", "cough", "illness"],
+          "weight": 1,
+          "required": true,
+          "red_flag": false
+        },
+        {
+          "id": "hpi_osmotic_symptoms",
+          "description": "Elicited polyuria/polydipsia (osmotic symptoms)",
+          "detection_cues": ["thirst", "thirsty", "urine", "passing water", "drinking", "polyuria"],
+          "weight": 1,
+          "required": false,
+          "red_flag": false
+        },
+        {
+          "id": "hpi_pregnancy_check",
+          "description": "Considered pregnancy as a precipitant in a woman of childbearing age",
+          "detection_cues": ["pregnan", "period", "menstru", "last period", "sexually active"],
+          "weight": 1,
+          "required": false,
+          "red_flag": false
+        }
+      ]
+    },
+    "physical_exam": {
+      "weight": 0.15,
+      "items": [
+        {
+          "id": "exam_vitals",
+          "description": "Checked vital signs",
+          "detection_cues": ["vitals", "blood pressure", "pulse", "saturation", "respiratory rate"],
+          "weight": 1,
+          "required": true,
+          "red_flag": false
+        },
+        {
+          "id": "exam_hydration",
+          "description": "Assessed hydration / volume status",
+          "detection_cues": ["hydration", "dehydrat", "turgor", "mucous", "capillary refill", "fluid status"],
+          "weight": 1,
+          "required": true,
+          "red_flag": false
+        }
+      ]
+    },
+    "investigations": {
+      "weight": 0.2,
+      "expected": ["Capillary Blood Ketones", "Venous Blood Gas", "Random Blood Glucose", "Urea & Electrolytes"],
+      "not_indicated": ["Serum Amylase", "Thyroid Function Tests"]
+    },
+    "diagnosis": {
+      "weight": 0.2,
+      "accepted": ["Diabetic ketoacidosis", "DKA"],
+      "acceptable_differentials": ["Hyperosmolar hyperglycaemic state", "Sepsis", "Gastroenteritis", "Acute abdomen (e.g. appendicitis)"]
+    },
+    "treatment": {
+      "weight": 0.15,
+      "items": [
+        {
+          "id": "tx_fluids",
+          "description": "Started IV fluid resuscitation",
+          "detection_cues": ["fluid", "saline", "normal saline", "0.9", "resuscitat", "iv fluids"],
+          "weight": 2,
+          "required": true,
+          "red_flag": true
+        },
+        {
+          "id": "tx_insulin",
+          "description": "Started fixed-rate IV insulin",
+          "detection_cues": ["insulin infusion", "fixed rate", "iv insulin", "insulin"],
+          "weight": 2,
+          "required": true,
+          "red_flag": true
+        },
+        {
+          "id": "tx_potassium",
+          "description": "Planned potassium monitoring/replacement",
+          "detection_cues": ["potassium", "k+", "replace", "electrolyte"],
+          "weight": 1,
+          "required": false,
+          "red_flag": false
+        }
+      ]
+    },
+    "communication": {
+      "weight": 0.05,
+      "items": [
+        {
+          "id": "comm_explained",
+          "description": "Explained the situation and plan to the patient clearly",
+          "detection_cues": ["explain", "let me tell you", "what we are going to do", "going to give you"],
+          "weight": 1,
+          "required": false,
+          "red_flag": false
+        }
+      ]
+    }
+  },
+  "teaching_points": {
+    "pearls": [
+      "DKA is defined by the triad: hyperglycaemia, ketonaemia/ketonuria and metabolic acidosis.",
+      "Serum potassium is often normal or high at presentation despite a large total-body deficit; it falls quickly once insulin starts.",
+      "Abdominal pain in DKA usually resolves with treatment of the acidosis."
+    ],
+    "pitfalls": [
+      "Giving insulin before checking potassium and starting fluids.",
+      "Missing the precipitant (infection, insulin omission, pregnancy).",
+      "Anchoring on a surgical abdomen and delaying DKA treatment."
+    ],
+    "references": ["JBDS Guidelines for the management of diabetic ketoacidosis in adults"],
+    "learning_objectives": [
+      "Recognise the clinical and biochemical features of DKA.",
+      "Prioritise fluids, fixed-rate insulin and potassium management.",
+      "Identify and treat the precipitant."
+    ]
+  }
+}

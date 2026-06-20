@@ -16,8 +16,12 @@ docs/adr         architecture decision records
 ```
 
 ## Status
-- **Phase 0** (foundation) — done: monorepo, backend skeleton, CI, ADRs, Docker,
-  frontend skeleton, and a streaming "walking skeleton" (`/api/v1/_skeleton`).
+- **Phase 0** (foundation + critical spike) — done: monorepo, backend skeleton,
+  CI, ADRs, Docker, frontend skeleton, a streaming "walking skeleton"
+  (`/api/v1/_skeleton`), and the **0C grading/gating spike** (go/no-go in
+  [`docs/spikes/grading_gating`](docs/spikes/grading_gating/FINDINGS.md)):
+  consistent tier separation, zero score variance, and zero patient leakage
+  under prompt injection against a live model.
 - **Phase 1** (domain & data) — done: entities, full schema, immutable cases
   (hash + Postgres trigger), repositories, case JSON Schema, seed. Verified on
   Postgres (`pytest` passing incl. trigger tests).
@@ -35,6 +39,12 @@ docs/adr         architecture decision records
   ordering, case browsing (metadata only), Redis rate limiting, and a standard
   response envelope. Verified live against OpenRouter: the patient stays in
   character and refuses to leak the diagnosis under prompt injection.
+- **Phase 4** (commitments & evaluation) — done: ordered, irreversible
+  commitment points (differential → diagnosis → management); the decoupled
+  evaluation worker (Examiner free-text extraction + **deterministic software
+  aggregation** into section/overall/differential/efficiency scores) writing a
+  write-once, provenance-stamped evaluation and a consultant report; the
+  evaluation endpoint. A second hand-authored Advanced case (DKA) ships with it.
 
 ## Quick start
 ```bash

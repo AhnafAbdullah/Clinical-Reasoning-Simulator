@@ -79,6 +79,42 @@ class PhysicalExamRepository(Protocol):
 
 
 @runtime_checkable
+class SubmissionRepository(Protocol):
+    """Differential / diagnosis / management commitments (write-once, locked)."""
+
+    def save_differential(self, session_id: uuid.UUID, differentials: list[str]) -> uuid.UUID: ...
+
+    def save_diagnosis(self, session_id: uuid.UUID, answer: str) -> uuid.UUID: ...
+
+    def save_treatment(self, session_id: uuid.UUID, plan: str) -> uuid.UUID: ...
+
+    def get_differential(self, session_id: uuid.UUID) -> list[str] | None: ...
+
+    def get_diagnosis(self, session_id: uuid.UUID) -> str | None: ...
+
+    def get_treatment(self, session_id: uuid.UUID) -> str | None: ...
+
+
+@runtime_checkable
+class EvaluationRepository(Protocol):
+    def exists(self, session_id: uuid.UUID) -> bool: ...
+
+    def save(
+        self,
+        *,
+        session_id: uuid.UUID,
+        overall: int,
+        section_scores: dict[str, int],
+        differential: int,
+        efficiency: int,
+        rubric_version: int | None,
+        feedback: dict,
+    ) -> None: ...
+
+    def get(self, session_id: uuid.UUID) -> dict | None: ...
+
+
+@runtime_checkable
 class CaseRepository(Protocol):
     def add(self, case: ClinicalCase) -> ClinicalCase: ...
 
