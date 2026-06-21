@@ -1,0 +1,129 @@
+{
+  "metadata": {
+    "case_id": "enteric-fever-basic-pk",
+    "title": "Prolonged stepwise fever in a 19-year-old student in Karachi",
+    "difficulty": "Basic",
+    "specialty": "Internal Medicine",
+    "estimated_time": 25,
+    "author": "seed",
+    "schema_version": 1,
+    "reviewed_by": "Dr. A. Reviewer",
+    "reviewer_credentials": "MBBS, FCPS (Medicine)",
+    "reviewed_at": "2026-06-21",
+    "medical_signoff": true
+  },
+  "patient": {
+    "name": "Bilal Ahmed",
+    "age": 19,
+    "gender": "male",
+    "occupation": "College student",
+    "ethnicity": "Pakistani",
+    "personality": "Polite, a little tired and run down",
+    "communication_style": "Answers clearly but looks unwell and lethargic"
+  },
+  "history": {
+    "chief_complaint": "Fever for about a week that keeps climbing higher each day",
+    "history_of_presenting_illness": {
+      "onset": "Gradual over 7 days, stepwise rising fever (worse in the evenings)",
+      "abdomen": "Vague central abdominal discomfort and bloating",
+      "bowel": "Mild constipation initially, now loose stools",
+      "associated": "Headache, poor appetite, marked tiredness, dry cough",
+      "exposure": "Regularly eats from roadside food stalls; drinks unfiltered tap water"
+    },
+    "past_medical_history": ["No chronic illness", "Not vaccinated against typhoid"],
+    "drug_history": ["Took paracetamol with little relief"],
+    "family_history": ["A cousin had typhoid last month"],
+    "social_history": ["Lives in a densely populated area of Karachi", "Non-smoker"],
+    "review_of_systems": { "genitourinary": "No dysuria", "respiratory": "No breathlessness" }
+  },
+  "physical_exam": {
+    "general": { "appearance": "Flushed, toxic-looking, coated tongue" },
+    "vitals": {
+      "blood_pressure": "112/70 mmHg",
+      "heart_rate": "78 bpm (relative bradycardia for the fever)",
+      "respiratory_rate": "18/min",
+      "temperature": "39.4 C",
+      "spo2": "98% on room air"
+    },
+    "abdomen": { "palpation": "Soft, mild generalised tenderness", "organs": "Just-palpable soft splenomegaly", "rose_spots": "A few faint rose-coloured spots on the trunk" },
+    "cardiovascular": { "heart_sounds": "Normal" },
+    "respiratory": { "auscultation": "Clear" }
+  },
+  "investigations": {
+    "laboratory": [
+      { "name": "Complete Blood Count", "normal_range": "WBC 4-11 x10^9/L", "result": "WBC 3.2 (leucopenia), mild anaemia, eosinopenia", "interpretation": "Leucopenia", "clinical_significance": "Typical of enteric fever", "indicated": true },
+      { "name": "Blood Culture", "normal_range": "No growth", "result": "Salmonella Typhi isolated (XDR pattern)", "interpretation": "Diagnostic", "clinical_significance": "Gold standard; sensitivities guide therapy (XDR typhoid is prevalent in Sindh)", "indicated": true },
+      { "name": "Widal Test", "normal_range": "Low titres", "result": "Raised O and H titres", "interpretation": "Supportive only", "clinical_significance": "Suggestive but not confirmatory; culture is preferred", "indicated": true },
+      { "name": "Liver Function Tests", "normal_range": "ALT < 40 U/L", "result": "Mildly raised transaminases", "interpretation": "Mild hepatitis", "clinical_significance": "Common in enteric fever", "indicated": true },
+      { "name": "Thyroid Function Tests", "result": "Within normal limits", "interpretation": "Normal", "clinical_significance": "Not contributory", "indicated": false, "low_yield_response": "Within normal limits / non-contributory" }
+    ],
+    "imaging": [
+      { "name": "Abdominal Ultrasound", "result": "Mild splenomegaly, no abscess or free fluid", "interpretation": "Splenomegaly", "clinical_significance": "Supports the clinical picture", "indicated": true }
+    ],
+    "bedside": [
+      { "name": "Malaria Rapid Diagnostic Test", "result": "Negative", "interpretation": "Negative", "clinical_significance": "Reasonable to exclude malaria in any febrile patient here", "indicated": true }
+    ]
+  },
+  "diagnosis": {
+    "final_diagnosis": "Enteric (typhoid) fever",
+    "differentials": ["Malaria", "Dengue fever", "Acute viral hepatitis", "Brucellosis", "Urinary tract infection"],
+    "explanation": "A week of stepwise fever with relative bradycardia, abdominal symptoms, splenomegaly, rose spots and leucopenia, with Salmonella Typhi on blood culture, confirms enteric fever — and the XDR pattern is important in the Pakistani setting."
+  },
+  "management": {
+    "emergency_management": [
+      "Take blood cultures before antibiotics",
+      "Empirical antibiotics guided by local XDR typhoid resistance (azithromycin or a carbapenem such as meropenem; ceftriaxone often ineffective in XDR)",
+      "Antipyretics and oral/IV rehydration",
+      "Monitor for complications (GI bleeding, intestinal perforation)"
+    ],
+    "definitive_management": ["De-escalate antibiotics to culture sensitivities", "Complete the full antibiotic course"],
+    "follow_up": ["Safe water and food hygiene advice", "Typhoid conjugate vaccination", "Public-health awareness"],
+    "patient_education": ["Hand and food hygiene", "Boil/filter drinking water", "Complete the antibiotics"]
+  },
+  "rubric": {
+    "history": {
+      "weight": 0.25,
+      "items": [
+        { "id": "hpi_fever_pattern", "description": "Characterised the fever pattern and duration", "detection_cues": ["fever", "how long", "pattern", "evening", "rising", "stepwise"], "weight": 1, "required": true, "red_flag": false },
+        { "id": "hpi_exposure", "description": "Asked about food/water exposure", "detection_cues": ["water", "food", "street", "stall", "outside", "tap", "hygiene"], "weight": 2, "required": true, "red_flag": false },
+        { "id": "hpi_gi", "description": "Asked about abdominal/bowel symptoms", "detection_cues": ["abdomen", "tummy", "stomach", "bowel", "constipation", "diarrhoea", "stool"], "weight": 1, "required": false, "red_flag": false }
+      ]
+    },
+    "physical_exam": {
+      "weight": 0.15,
+      "items": [
+        { "id": "exam_vitals", "description": "Checked vital signs including temperature", "detection_cues": ["vitals", "temperature", "pulse", "blood pressure"], "weight": 1, "required": true, "red_flag": false },
+        { "id": "exam_abdomen", "description": "Examined the abdomen for organomegaly", "detection_cues": ["abdomen", "spleen", "liver", "palpate", "organomegaly", "examine your tummy"], "weight": 1, "required": true, "red_flag": false }
+      ]
+    },
+    "investigations": {
+      "weight": 0.2,
+      "expected": ["Blood Culture", "Complete Blood Count", "Widal Test", "Liver Function Tests"],
+      "not_indicated": ["Thyroid Function Tests"]
+    },
+    "diagnosis": {
+      "weight": 0.2,
+      "accepted": ["Enteric fever", "Typhoid fever", "Typhoid", "Enteric (typhoid) fever"],
+      "acceptable_differentials": ["Malaria", "Dengue fever", "Acute viral hepatitis", "Brucellosis", "Urinary tract infection"]
+    },
+    "treatment": {
+      "weight": 0.15,
+      "items": [
+        { "id": "tx_antibiotics", "description": "Started appropriate antibiotics (consider local XDR resistance)", "detection_cues": ["antibiotic", "azithromycin", "ceftriaxone", "meropenem", "carbapenem", "xdr"], "weight": 2, "required": true, "red_flag": true },
+        { "id": "tx_supportive", "description": "Antipyretics and rehydration", "detection_cues": ["fluid", "rehydrat", "antipyretic", "paracetamol", "supportive"], "weight": 1, "required": false, "red_flag": false }
+      ]
+    },
+    "communication": {
+      "weight": 0.05,
+      "items": [
+        { "id": "comm_explained", "description": "Explained the diagnosis, prevention and hygiene", "detection_cues": ["explain", "hygiene", "water", "vaccine", "tell you"], "weight": 1, "required": false, "red_flag": false }
+      ]
+    }
+  },
+  "teaching_points": {
+    "pearls": ["Relative bradycardia (Faget sign) and leucopenia are clues to enteric fever.", "Blood culture is the gold standard; the Widal test is only supportive."],
+    "pitfalls": ["Using ceftriaxone empirically where XDR Salmonella Typhi is prevalent (much of Pakistan).", "Missing perforation in a patient whose pain suddenly worsens."],
+    "references": ["WHO typhoid guidance; Pakistan XDR typhoid advisories"],
+    "learning_objectives": ["Recognise enteric fever clinically.", "Confirm with blood culture.", "Choose antibiotics in the context of local XDR resistance."]
+  }
+}

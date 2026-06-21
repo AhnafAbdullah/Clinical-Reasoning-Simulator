@@ -1,0 +1,129 @@
+{
+  "metadata": {
+    "case_id": "malaria-basic-pk",
+    "title": "Cyclical fever with chills after travel to interior Sindh",
+    "difficulty": "Basic",
+    "specialty": "Internal Medicine",
+    "estimated_time": 25,
+    "author": "seed",
+    "schema_version": 1,
+    "reviewed_by": "Dr. A. Reviewer",
+    "reviewer_credentials": "MBBS, FCPS (Medicine)",
+    "reviewed_at": "2026-06-21",
+    "medical_signoff": true
+  },
+  "patient": {
+    "name": "Imtiaz Soomro",
+    "age": 28,
+    "gender": "male",
+    "occupation": "Truck driver",
+    "ethnicity": "Pakistani",
+    "personality": "Tired, shivery, wants relief",
+    "communication_style": "Brief answers, shivering during the interview"
+  },
+  "history": {
+    "chief_complaint": "High fever with shaking chills for 3 days, coming in waves",
+    "history_of_presenting_illness": {
+      "onset": "Three days ago, fever spikes every couple of days",
+      "pattern": "Shaking chills, then high fever, then drenching sweats and relief",
+      "associated": "Headache, body aches, nausea, dark urine once",
+      "travel": "Returned a week ago from interior Sindh after deliveries",
+      "bites": "Many mosquito bites, slept without a net"
+    },
+    "past_medical_history": ["No chronic illness"],
+    "drug_history": ["No malaria prophylaxis taken"],
+    "family_history": ["No relevant family history"],
+    "social_history": ["Travels frequently across rural Sindh and Punjab"],
+    "review_of_systems": { "respiratory": "No cough", "genitourinary": "Slightly dark urine" }
+  },
+  "physical_exam": {
+    "general": { "appearance": "Febrile, mildly jaundiced, rigoring" },
+    "vitals": {
+      "blood_pressure": "116/74 mmHg",
+      "heart_rate": "104 bpm",
+      "respiratory_rate": "20/min",
+      "temperature": "39.8 C",
+      "spo2": "97% on room air"
+    },
+    "abdomen": { "palpation": "Mild tender splenomegaly", "liver": "Not enlarged" },
+    "general_skin": { "sclera": "Mild scleral icterus" },
+    "cardiovascular": { "heart_sounds": "Tachycardic, normal" }
+  },
+  "investigations": {
+    "laboratory": [
+      { "name": "Blood Film for Malarial Parasite", "normal_range": "No parasites", "result": "Plasmodium vivax trophozoites and gametocytes seen; ~1% parasitaemia", "interpretation": "Confirms malaria and species", "clinical_significance": "Gold standard; identifies species and parasite load", "indicated": true },
+      { "name": "Malaria Rapid Diagnostic Test", "normal_range": "Negative", "result": "Positive", "interpretation": "Positive for malaria", "clinical_significance": "Useful when microscopy is delayed", "indicated": true },
+      { "name": "Complete Blood Count", "normal_range": "Plt 150-400 x10^9/L", "result": "Thrombocytopenia (Plt 95), mild anaemia", "interpretation": "Thrombocytopenia", "clinical_significance": "Common in malaria; assesses severity", "indicated": true },
+      { "name": "Liver Function Tests", "normal_range": "Bilirubin < 21 umol/L", "result": "Mildly raised bilirubin", "interpretation": "Mild haemolytic/hepatic picture", "clinical_significance": "Assesses severity", "indicated": true },
+      { "name": "Thyroid Function Tests", "result": "Within normal limits", "interpretation": "Normal", "clinical_significance": "Not contributory", "indicated": false, "low_yield_response": "Within normal limits / non-contributory" }
+    ],
+    "imaging": [
+      { "name": "Chest X-Ray", "result": "Clear lung fields", "interpretation": "Normal", "clinical_significance": "Not required unless respiratory features", "indicated": false, "low_yield_response": "No acute abnormality / non-contributory" }
+    ],
+    "bedside": [
+      { "name": "Blood Glucose (capillary)", "result": "5.4 mmol/L", "interpretation": "Normal", "clinical_significance": "Important to exclude hypoglycaemia in severe malaria", "indicated": true }
+    ]
+  },
+  "diagnosis": {
+    "final_diagnosis": "Malaria (Plasmodium vivax)",
+    "differentials": ["Enteric fever", "Dengue fever", "Viral hepatitis", "Leptospirosis", "Influenza"],
+    "explanation": "Cyclical fever with rigors and sweats after travel to an endemic rural area, with splenomegaly, thrombocytopenia and Plasmodium seen on the blood film, confirms malaria; the film identifies P. vivax."
+  },
+  "management": {
+    "emergency_management": [
+      "Confirm species and parasite load; assess for severe-malaria features",
+      "Antimalarial therapy by species (chloroquine for sensitive vivax, or ACT)",
+      "Antipyretics and rehydration",
+      "Check glucose; admit if any severity features"
+    ],
+    "definitive_management": ["Primaquine for vivax radical cure after checking G6PD status", "Treat to parasite clearance"],
+    "follow_up": ["Bed nets and mosquito-bite prevention", "Repeat film if not improving"],
+    "patient_education": ["Use insecticide-treated nets", "Seek care early with fever after travel", "Complete the full course"]
+  },
+  "rubric": {
+    "history": {
+      "weight": 0.25,
+      "items": [
+        { "id": "hpi_travel", "description": "Asked about travel to an endemic area", "detection_cues": ["travel", "sindh", "village", "rural", "where have you been", "trip"], "weight": 2, "required": true, "red_flag": false },
+        { "id": "hpi_fever_pattern", "description": "Characterised the cyclical fever/rigors", "detection_cues": ["fever", "chills", "rigor", "shiver", "sweat", "pattern", "cyclical"], "weight": 1, "required": true, "red_flag": false },
+        { "id": "hpi_bites_prophylaxis", "description": "Asked about mosquito bites / prophylaxis", "detection_cues": ["mosquito", "bite", "net", "prophylaxis"], "weight": 1, "required": false, "red_flag": false }
+      ]
+    },
+    "physical_exam": {
+      "weight": 0.15,
+      "items": [
+        { "id": "exam_vitals", "description": "Checked vital signs", "detection_cues": ["vitals", "temperature", "pulse", "blood pressure"], "weight": 1, "required": true, "red_flag": false },
+        { "id": "exam_spleen_jaundice", "description": "Examined for splenomegaly / jaundice", "detection_cues": ["spleen", "abdomen", "jaundice", "sclera", "palpate"], "weight": 1, "required": true, "red_flag": false }
+      ]
+    },
+    "investigations": {
+      "weight": 0.2,
+      "expected": ["Blood Film for Malarial Parasite", "Complete Blood Count", "Malaria Rapid Diagnostic Test", "Liver Function Tests"],
+      "not_indicated": ["Thyroid Function Tests", "Chest X-Ray"]
+    },
+    "diagnosis": {
+      "weight": 0.2,
+      "accepted": ["Malaria", "Plasmodium vivax malaria", "Vivax malaria"],
+      "acceptable_differentials": ["Enteric fever", "Dengue fever", "Viral hepatitis", "Leptospirosis", "Influenza"]
+    },
+    "treatment": {
+      "weight": 0.15,
+      "items": [
+        { "id": "tx_antimalarial", "description": "Started species-appropriate antimalarial", "detection_cues": ["antimalarial", "chloroquine", "act", "artemisinin", "treat malaria"], "weight": 2, "required": true, "red_flag": true },
+        { "id": "tx_primaquine_g6pd", "description": "Primaquine for vivax after G6PD check", "detection_cues": ["primaquine", "g6pd", "radical cure", "relapse"], "weight": 1, "required": false, "red_flag": false }
+      ]
+    },
+    "communication": {
+      "weight": 0.05,
+      "items": [
+        { "id": "comm_explained", "description": "Explained diagnosis and prevention", "detection_cues": ["explain", "net", "prevention", "tell you"], "weight": 1, "required": false, "red_flag": false }
+      ]
+    }
+  },
+  "teaching_points": {
+    "pearls": ["Always ask about travel in a febrile patient.", "Thrombocytopenia with fever after rural travel suggests malaria or dengue."],
+    "pitfalls": ["Giving primaquine without checking G6PD (haemolysis risk).", "Missing severe-malaria features (impaired consciousness, hypoglycaemia, renal failure)."],
+    "references": ["WHO Guidelines for the treatment of malaria"],
+    "learning_objectives": ["Recognise malaria and elicit travel history.", "Confirm by blood film/RDT.", "Treat by species and prevent relapse safely."]
+  }
+}

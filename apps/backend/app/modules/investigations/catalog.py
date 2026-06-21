@@ -41,6 +41,24 @@ CATALOG: tuple[CatalogEntry, ...] = (
     CatalogEntry("CT Head", "imaging"),
     CatalogEntry("CT Pulmonary Angiogram", "imaging"),
     CatalogEntry("Echocardiogram", "imaging"),
+    CatalogEntry("Renal Ultrasound", "imaging"),
+    # Infectious / endemic work-up (Pakistani-context cases)
+    CatalogEntry("Blood Culture", "laboratory"),
+    CatalogEntry("Urine Culture", "laboratory"),
+    CatalogEntry("Widal Test", "laboratory"),
+    CatalogEntry("Blood Film for Malarial Parasite", "laboratory"),
+    CatalogEntry("Malaria Rapid Diagnostic Test", "bedside"),
+    CatalogEntry("Dengue NS1 Antigen", "laboratory"),
+    CatalogEntry("Dengue Serology (IgM/IgG)", "laboratory"),
+    CatalogEntry("Sputum AFB Smear", "laboratory"),
+    CatalogEntry("Sputum GeneXpert (Xpert MTB/RIF)", "laboratory"),
+    CatalogEntry("HIV Test", "laboratory"),
+    CatalogEntry("Hepatitis Viral Serology", "laboratory"),
+    CatalogEntry("Serum Cholinesterase", "laboratory"),
+    CatalogEntry("Serum Lipase", "laboratory"),
+    CatalogEntry("BNP", "laboratory"),
+    CatalogEntry("Lumbar Puncture / CSF Analysis", "laboratory"),
+    CatalogEntry("Pregnancy Test", "bedside"),
 )
 
 

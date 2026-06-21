@@ -1,0 +1,130 @@
+{
+  "metadata": {
+    "case_id": "acute-viral-hepatitis-intermediate-pk",
+    "title": "Yellow eyes and nausea in a 22-year-old after eating out",
+    "difficulty": "Intermediate",
+    "specialty": "Internal Medicine",
+    "estimated_time": 26,
+    "author": "seed",
+    "schema_version": 1,
+    "reviewed_by": "Dr. A. Reviewer",
+    "reviewer_credentials": "MBBS, FCPS (Medicine)",
+    "reviewed_at": "2026-06-21",
+    "medical_signoff": true
+  },
+  "patient": {
+    "name": "Sana Tariq",
+    "age": 22,
+    "gender": "female",
+    "occupation": "University student",
+    "ethnicity": "Pakistani",
+    "personality": "Anxious about the yellow colour of her eyes",
+    "communication_style": "Cooperative, clearly worried"
+  },
+  "history": {
+    "chief_complaint": "Yellowing of the eyes and skin with nausea for 4 days",
+    "history_of_presenting_illness": {
+      "prodrome": "A week of tiredness, nausea, poor appetite and a distaste for fatty/fried food",
+      "jaundice": "Then noticed yellow eyes, dark urine and pale stools",
+      "pain": "Mild right upper-quadrant discomfort",
+      "fever": "Low-grade fever early on, now settling",
+      "exposure": "Ate at several roadside eateries; unfiltered water; a classmate had jaundice recently"
+    },
+    "past_medical_history": ["No chronic liver disease", "Not pregnant"],
+    "drug_history": ["No regular medicines, no herbal/hepatotoxic remedies", "No paracetamol overdose"],
+    "family_history": ["No relevant family history"],
+    "social_history": ["No alcohol", "No injections, tattoos or transfusions"],
+    "review_of_systems": { "git": "Nausea, anorexia", "gynaecological": "LMP 2 weeks ago, not pregnant" }
+  },
+  "physical_exam": {
+    "general": { "appearance": "Visibly jaundiced (sclera and skin), not encephalopathic" },
+    "vitals": {
+      "blood_pressure": "114/72 mmHg",
+      "heart_rate": "76 bpm",
+      "respiratory_rate": "16/min",
+      "temperature": "37.3 C",
+      "spo2": "99% on room air"
+    },
+    "abdomen": { "palpation": "Tender, smooth hepatomegaly; no splenomegaly or ascites" },
+    "neurology": { "asterixis": "Absent (no encephalopathy)" },
+    "general_skin": { "sclera": "Deep icterus", "stigmata_cld": "No spider naevi or palmar erythema" }
+  },
+  "investigations": {
+    "laboratory": [
+      { "name": "Liver Function Tests", "normal_range": "ALT < 40 U/L", "result": "ALT 1450, AST 1200 (markedly raised), bilirubin high, ALP mildly raised", "interpretation": "Hepatocellular pattern", "clinical_significance": "Confirms acute hepatitis", "indicated": true },
+      { "name": "Hepatitis Viral Serology", "normal_range": "Negative", "result": "Anti-HAV IgM positive (Hep B and C negative)", "interpretation": "Acute hepatitis A", "clinical_significance": "Identifies the cause", "indicated": true },
+      { "name": "Coagulation Profile", "normal_range": "INR ~1.0", "result": "INR 1.1 (normal)", "interpretation": "Normal synthetic function", "clinical_significance": "Key marker of severity / acute liver failure", "indicated": true },
+      { "name": "Complete Blood Count", "normal_range": "WBC 4-11 x10^9/L", "result": "Normal", "interpretation": "Normal", "clinical_significance": "Baseline", "indicated": true },
+      { "name": "Thyroid Function Tests", "result": "Within normal limits", "interpretation": "Normal", "clinical_significance": "Not contributory", "indicated": false, "low_yield_response": "Within normal limits / non-contributory" }
+    ],
+    "imaging": [
+      { "name": "Abdominal Ultrasound", "result": "Mild hepatomegaly, patent vessels, no biliary obstruction or gallstones", "interpretation": "No obstruction", "clinical_significance": "Excludes obstructive (surgical) jaundice", "indicated": true }
+    ],
+    "bedside": [
+      { "name": "Pregnancy Test", "result": "Negative", "interpretation": "Not pregnant", "clinical_significance": "Hepatitis E in pregnancy is dangerous — always check", "indicated": true }
+    ]
+  },
+  "diagnosis": {
+    "final_diagnosis": "Acute viral hepatitis A",
+    "differentials": ["Hepatitis E", "Hepatitis B", "Drug-induced liver injury", "Obstructive jaundice (gallstones)", "Leptospirosis"],
+    "explanation": "A young patient with a viral prodrome, jaundice with dark urine and pale stools, tender hepatomegaly, a markedly hepatocellular LFT pattern with a normal INR, positive anti-HAV IgM and no biliary obstruction on ultrasound, has acute viral hepatitis A from faecal-oral exposure."
+  },
+  "management": {
+    "emergency_management": [
+      "Confirm it is not acute liver failure (check INR and mental state)",
+      "Supportive care: rest, hydration, antiemetics",
+      "Stop any hepatotoxic drugs; avoid alcohol",
+      "Monitor LFTs and INR for deterioration"
+    ],
+    "definitive_management": ["Most hepatitis A is self-limiting; arrange outpatient follow-up", "Refer urgently if signs of acute liver failure (rising INR, encephalopathy)"],
+    "follow_up": ["Hand and food hygiene; safe water", "Hepatitis A vaccination of contacts where appropriate"],
+    "patient_education": ["It usually resolves on its own", "Avoid alcohol and hepatotoxins", "Hygiene to prevent spread; return if drowsy or bleeding"]
+  },
+  "rubric": {
+    "history": {
+      "weight": 0.25,
+      "items": [
+        { "id": "hpi_jaundice", "description": "Characterised jaundice, dark urine, pale stools", "detection_cues": ["yellow", "jaundice", "urine", "dark", "pale stool", "stool colour"], "weight": 1, "required": true, "red_flag": false },
+        { "id": "hpi_exposure", "description": "Asked about food/water exposure and contacts", "detection_cues": ["food", "water", "outside", "roadside", "contact", "classmate", "hygiene"], "weight": 1, "required": true, "red_flag": false },
+        { "id": "hpi_risk_other", "description": "Asked about drugs/alcohol/transfusion/injections", "detection_cues": ["alcohol", "drug", "medicine", "herbal", "transfusion", "injection", "tattoo"], "weight": 1, "required": true, "red_flag": false },
+        { "id": "hpi_pregnancy", "description": "Asked about pregnancy (hepatitis E risk)", "detection_cues": ["pregnan", "period", "lmp"], "weight": 1, "required": false, "red_flag": false }
+      ]
+    },
+    "physical_exam": {
+      "weight": 0.15,
+      "items": [
+        { "id": "exam_vitals", "description": "Checked vital signs", "detection_cues": ["vitals", "temperature", "blood pressure", "pulse"], "weight": 1, "required": true, "red_flag": false },
+        { "id": "exam_abdomen_liver", "description": "Examined abdomen/liver and looked for encephalopathy", "detection_cues": ["abdomen", "liver", "hepatomegaly", "palpate", "asterixis", "examine your tummy"], "weight": 1, "required": true, "red_flag": false }
+      ]
+    },
+    "investigations": {
+      "weight": 0.2,
+      "expected": ["Liver Function Tests", "Hepatitis Viral Serology", "Coagulation Profile", "Abdominal Ultrasound"],
+      "not_indicated": ["Thyroid Function Tests"]
+    },
+    "diagnosis": {
+      "weight": 0.2,
+      "accepted": ["Acute viral hepatitis A", "Hepatitis A", "Acute viral hepatitis", "Viral hepatitis"],
+      "acceptable_differentials": ["Hepatitis E", "Hepatitis B", "Drug-induced liver injury", "Obstructive jaundice (gallstones)", "Leptospirosis"]
+    },
+    "treatment": {
+      "weight": 0.15,
+      "items": [
+        { "id": "tx_supportive", "description": "Supportive care; stop hepatotoxins/alcohol", "detection_cues": ["supportive", "rest", "hydrat", "fluids", "stop alcohol", "avoid hepatotoxic", "antiemetic"], "weight": 2, "required": true, "red_flag": false },
+        { "id": "tx_monitor_alf", "description": "Monitor INR/mental state for acute liver failure", "detection_cues": ["inr", "monitor", "liver failure", "encephalopathy", "coagulation"], "weight": 1, "required": true, "red_flag": true }
+      ]
+    },
+    "communication": {
+      "weight": 0.05,
+      "items": [
+        { "id": "comm_explained", "description": "Reassured and explained hygiene/prevention", "detection_cues": ["explain", "reassure", "self-limiting", "hygiene", "tell you"], "weight": 1, "required": false, "red_flag": false }
+      ]
+    }
+  },
+  "teaching_points": {
+    "pearls": ["INR and mental state — not bilirubin — define the severity of acute hepatitis.", "Always exclude pregnancy: hepatitis E carries high mortality in pregnancy."],
+    "pitfalls": ["Missing obstructive jaundice — ultrasound excludes a surgical cause.", "Missing early acute liver failure (rising INR, drowsiness)."],
+    "references": ["WHO viral hepatitis guidance"],
+    "learning_objectives": ["Work up jaundice (hepatocellular vs obstructive).", "Identify the viral cause.", "Recognise acute liver failure and manage supportively."]
+  }
+}
