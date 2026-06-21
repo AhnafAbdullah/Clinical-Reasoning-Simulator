@@ -1,0 +1,130 @@
+{
+  "metadata": {
+    "case_id": "acute-heart-failure-intermediate",
+    "title": "Sudden severe breathlessness at night in a 70-year-old",
+    "difficulty": "Intermediate",
+    "specialty": "Internal Medicine",
+    "estimated_time": 28,
+    "author": "seed",
+    "schema_version": 1,
+    "reviewed_by": "Dr. A. Reviewer",
+    "reviewer_credentials": "MBBS, FCPS (Medicine)",
+    "reviewed_at": "2026-06-21",
+    "medical_signoff": true
+  },
+  "patient": {
+    "name": "Margaret Doyle",
+    "age": 70,
+    "gender": "female",
+    "occupation": "Retired",
+    "ethnicity": "White Irish",
+    "personality": "Frightened, very breathless",
+    "communication_style": "Can only speak a few words at a time"
+  },
+  "history": {
+    "chief_complaint": "Woke at night gasping for breath, now very breathless",
+    "history_of_presenting_illness": {
+      "onset": "Woke at 3am unable to breathe, sat up at the window for air",
+      "orthopnoea": "Sleeps on 3 pillows, worse lying flat",
+      "pnd": "Paroxysmal nocturnal dyspnoea",
+      "cough": "Frothy pink sputum",
+      "swelling": "Ankle swelling getting worse over a week"
+    },
+    "past_medical_history": ["Previous myocardial infarction", "Hypertension"],
+    "drug_history": ["Ramipril", "Bisoprolol", "Aspirin (recently missed doses)"],
+    "family_history": ["No relevant family history"],
+    "social_history": ["Ex-smoker", "Adds salt to food"],
+    "review_of_systems": { "cardiovascular": "No chest pain currently", "git": "Reduced appetite" }
+  },
+  "physical_exam": {
+    "general": { "appearance": "Sitting upright, sweaty, severely breathless" },
+    "vitals": {
+      "blood_pressure": "162/96 mmHg",
+      "heart_rate": "112 bpm",
+      "respiratory_rate": "30/min",
+      "temperature": "36.7 C",
+      "spo2": "86% on room air"
+    },
+    "respiratory": { "auscultation": "Fine bibasal inspiratory crackles to mid-zones" },
+    "cardiovascular": { "jvp": "Raised", "heart_sounds": "Third heart sound (S3) gallop", "peripheral_oedema": "Bilateral pitting ankle oedema" }
+  },
+  "investigations": {
+    "laboratory": [
+      { "name": "BNP", "normal_range": "< 100 pg/mL", "result": "1850 pg/mL", "interpretation": "Markedly elevated", "clinical_significance": "Supports heart failure", "indicated": true },
+      { "name": "Urea & Electrolytes", "normal_range": "Creatinine 60-110 umol/L", "result": "Creatinine 118, K 4.4", "interpretation": "Mild renal impairment", "clinical_significance": "Baseline before diuretics", "indicated": true },
+      { "name": "Troponin I", "normal_range": "< 0.04 ng/mL", "result": "Mildly raised", "interpretation": "Non-specific", "clinical_significance": "Excludes a precipitating MI", "indicated": true },
+      { "name": "Thyroid Function Tests", "result": "Within normal limits", "interpretation": "Normal", "clinical_significance": "Not contributory acutely", "indicated": false, "low_yield_response": "Within normal limits / non-contributory" }
+    ],
+    "imaging": [
+      { "name": "Chest X-Ray", "result": "Cardiomegaly, upper-lobe diversion, Kerley B lines, bilateral effusions", "interpretation": "Pulmonary oedema", "clinical_significance": "Confirms cardiogenic pulmonary oedema", "indicated": true },
+      { "name": "Echocardiogram", "result": "Reduced LV ejection fraction (~35%)", "interpretation": "Systolic dysfunction", "clinical_significance": "Confirms and characterises heart failure", "indicated": true }
+    ],
+    "bedside": [
+      { "name": "ECG", "result": "Sinus tachycardia, old anterior Q waves, no acute ST changes", "interpretation": "Prior MI, no acute STEMI", "clinical_significance": "Looks for ischaemic precipitant/arrhythmia", "indicated": true }
+    ]
+  },
+  "diagnosis": {
+    "final_diagnosis": "Acute decompensated heart failure with pulmonary oedema",
+    "differentials": ["Pneumonia", "COPD exacerbation", "Pulmonary embolism", "Acute coronary syndrome"],
+    "explanation": "Acute breathlessness with orthopnoea, PND, raised JVP, S3, bibasal crackles, pitting oedema, a very high BNP and pulmonary oedema on chest X-ray indicate acute decompensated (systolic) heart failure."
+  },
+  "management": {
+    "emergency_management": [
+      "Sit upright; high-flow oxygen if hypoxic",
+      "IV loop diuretic (furosemide)",
+      "Consider IV nitrates if hypertensive and not hypotensive",
+      "Continuous monitoring; consider CPAP if not improving",
+      "Identify and treat the precipitant"
+    ],
+    "definitive_management": ["Optimise guideline-directed heart-failure therapy", "Fluid balance and daily weights"],
+    "follow_up": ["Heart-failure clinic", "Echo-guided therapy titration"],
+    "patient_education": ["Salt and fluid advice", "Medication adherence", "Daily weights and when to seek help"]
+  },
+  "rubric": {
+    "history": {
+      "weight": 0.25,
+      "items": [
+        { "id": "hpi_orthopnoea_pnd", "description": "Asked about orthopnoea / PND", "detection_cues": ["pillow", "lying flat", "orthopnoea", "wake", "night", "gasping"], "weight": 2, "required": true, "red_flag": false },
+        { "id": "hpi_oedema", "description": "Asked about ankle swelling", "detection_cues": ["swelling", "ankle", "oedema", "legs"], "weight": 1, "required": true, "red_flag": false },
+        { "id": "hpi_cardiac_history", "description": "Elicited cardiac history / adherence", "detection_cues": ["heart attack", "mi", "medication", "missed", "tablets"], "weight": 1, "required": false, "red_flag": false }
+      ]
+    },
+    "physical_exam": {
+      "weight": 0.15,
+      "items": [
+        { "id": "exam_vitals", "description": "Checked vitals including saturations", "detection_cues": ["vitals", "saturation", "spo2", "blood pressure"], "weight": 1, "required": true, "red_flag": false },
+        { "id": "exam_cvs_chest", "description": "Examined heart and lungs (JVP, crackles, oedema)", "detection_cues": ["jvp", "auscultat", "crackles", "heart sounds", "oedema", "chest"], "weight": 1, "required": true, "red_flag": false }
+      ]
+    },
+    "investigations": {
+      "weight": 0.2,
+      "expected": ["Chest X-Ray", "BNP", "ECG", "Echocardiogram"],
+      "not_indicated": ["Thyroid Function Tests"]
+    },
+    "diagnosis": {
+      "weight": 0.2,
+      "accepted": ["Acute decompensated heart failure", "Heart failure", "Pulmonary oedema", "Acute heart failure"],
+      "acceptable_differentials": ["Pneumonia", "COPD exacerbation", "Pulmonary embolism", "Acute coronary syndrome"]
+    },
+    "treatment": {
+      "weight": 0.15,
+      "items": [
+        { "id": "tx_diuretic", "description": "Gave IV loop diuretic", "detection_cues": ["furosemide", "diuretic", "frusemide", "water tablet"], "weight": 2, "required": true, "red_flag": true },
+        { "id": "tx_oxygen_sit_up", "description": "Oxygen and sit upright", "detection_cues": ["oxygen", "sit up", "upright", "cpap"], "weight": 1, "required": true, "red_flag": false },
+        { "id": "tx_nitrates", "description": "Considered nitrates if hypertensive", "detection_cues": ["nitrate", "gtn", "glyceryl trinitrate"], "weight": 1, "required": false, "red_flag": false }
+      ]
+    },
+    "communication": {
+      "weight": 0.05,
+      "items": [
+        { "id": "comm_explained", "description": "Explained diagnosis and plan", "detection_cues": ["explain", "tell you", "going to"], "weight": 1, "required": false, "red_flag": false }
+      ]
+    }
+  },
+  "teaching_points": {
+    "pearls": ["S3 gallop and raised JVP with bibasal crackles strongly suggest heart failure.", "A normal BNP makes heart failure unlikely."],
+    "pitfalls": ["Giving large fluid boluses.", "Missing an ischaemic or arrhythmic precipitant."],
+    "references": ["NICE: Acute heart failure"],
+    "learning_objectives": ["Recognise acute pulmonary oedema.", "Treat with sit-up/oxygen/diuretic/nitrates.", "Find the precipitant and optimise therapy."]
+  }
+}

@@ -1,0 +1,135 @@
+{
+  "metadata": {
+    "case_id": "copd-exacerbation-intermediate",
+    "title": "Worsening breathlessness in a 72-year-old smoker with COPD",
+    "difficulty": "Intermediate",
+    "specialty": "Internal Medicine",
+    "estimated_time": 28,
+    "author": "seed",
+    "schema_version": 1,
+    "reviewed_by": "Dr. A. Reviewer",
+    "reviewer_credentials": "MBBS, FCPS (Medicine)",
+    "reviewed_at": "2026-06-21",
+    "medical_signoff": true
+  },
+  "patient": {
+    "name": "Brian Whitfield",
+    "age": 72,
+    "gender": "male",
+    "occupation": "Retired dockworker",
+    "ethnicity": "White British",
+    "personality": "Stoic, downplays symptoms",
+    "communication_style": "Breathless, pursed-lip breathing, short phrases"
+  },
+  "history": {
+    "chief_complaint": "More breathless than usual with increased sputum for 2 days",
+    "history_of_presenting_illness": {
+      "onset": "Gradual over 2 days",
+      "breathlessness": "Worse than baseline, breathless on minimal exertion",
+      "sputum": "Increased volume, now green (was usually white)",
+      "cough": "More frequent",
+      "trigger": "Started a few days after a head cold",
+      "associated": "No chest pain, no fever spikes"
+    },
+    "past_medical_history": ["COPD (on inhalers)", "Hypertension"],
+    "drug_history": ["Tiotropium inhaler", "Salbutamol PRN", "Amlodipine"],
+    "family_history": ["No relevant family history"],
+    "social_history": ["Current smoker, 50 pack-years", "Lives alone"],
+    "review_of_systems": { "cardiovascular": "Mild ankle swelling", "git": "Appetite reduced" }
+  },
+  "physical_exam": {
+    "general": { "appearance": "Breathless, using accessory muscles, pursed-lip breathing" },
+    "vitals": {
+      "blood_pressure": "138/82 mmHg",
+      "heart_rate": "98 bpm",
+      "respiratory_rate": "24/min",
+      "temperature": "37.4 C",
+      "spo2": "88% on room air"
+    },
+    "respiratory": {
+      "inspection": "Hyperexpanded chest",
+      "percussion": "Hyper-resonant",
+      "auscultation": "Widespread polyphonic wheeze, prolonged expiration"
+    },
+    "cardiovascular": { "heart_sounds": "Normal", "peripheral_oedema": "Mild bilateral ankle oedema" }
+  },
+  "investigations": {
+    "laboratory": [
+      { "name": "Arterial Blood Gas", "normal_range": "pH 7.35-7.45, PaCO2 4.7-6.0 kPa", "result": "pH 7.33, PaCO2 7.6 kPa, PaO2 7.4 kPa, HCO3 30", "interpretation": "Compensated respiratory acidosis with type 2 respiratory failure", "clinical_significance": "Guides controlled oxygen and consideration of NIV", "indicated": true },
+      { "name": "Complete Blood Count", "normal_range": "WBC 4-11 x10^9/L", "result": "WBC 12.8 (neutrophilia)", "interpretation": "Mild leucocytosis", "clinical_significance": "Supports infective exacerbation", "indicated": true },
+      { "name": "C-Reactive Protein", "normal_range": "< 5 mg/L", "result": "62 mg/L", "interpretation": "Raised", "clinical_significance": "Infective trigger", "indicated": true },
+      { "name": "D-Dimer", "result": "Mildly raised", "interpretation": "Non-specific", "clinical_significance": "Low pre-test probability for PE here; risks false positive", "indicated": false, "low_yield_response": "Non-specifically raised / non-contributory" }
+    ],
+    "imaging": [
+      { "name": "Chest X-Ray", "result": "Hyperinflated lungs, no consolidation or pneumothorax", "interpretation": "Hyperinflation", "clinical_significance": "Excludes pneumonia/pneumothorax", "indicated": true }
+    ],
+    "bedside": [
+      { "name": "ECG", "result": "Sinus rhythm, no acute ischaemia", "interpretation": "Normal", "clinical_significance": "Excludes cardiac cause", "indicated": true }
+    ]
+  },
+  "diagnosis": {
+    "final_diagnosis": "Acute infective exacerbation of COPD",
+    "differentials": ["Pneumonia", "Heart failure", "Pulmonary embolism", "Pneumothorax"],
+    "explanation": "Known COPD with increased breathlessness, sputum volume and purulence after a viral URTI, hyperexpanded wheezy chest and type 2 respiratory failure on ABG indicate an infective exacerbation of COPD."
+  },
+  "management": {
+    "emergency_management": [
+      "Controlled oxygen targeting SpO2 88-92% (Venturi mask)",
+      "Nebulised salbutamol and ipratropium",
+      "Oral corticosteroids (prednisolone)",
+      "Antibiotics for purulent sputum",
+      "Consider non-invasive ventilation if persistent respiratory acidosis"
+    ],
+    "definitive_management": ["Repeat ABG after treatment", "Optimise inhaler technique and therapy"],
+    "follow_up": ["Smoking cessation", "Pulmonary rehabilitation referral", "Vaccinations"],
+    "patient_education": ["Inhaler technique", "Recognise early exacerbation", "Rescue pack use"]
+  },
+  "rubric": {
+    "history": {
+      "weight": 0.25,
+      "items": [
+        { "id": "hpi_sputum_change", "description": "Asked about change in sputum volume/colour", "detection_cues": ["sputum", "phlegm", "colour", "green", "volume", "more"], "weight": 1, "required": true, "red_flag": false },
+        { "id": "hpi_baseline", "description": "Compared to baseline exercise tolerance", "detection_cues": ["usual", "baseline", "normally", "compared", "exercise tolerance"], "weight": 1, "required": true, "red_flag": false },
+        { "id": "hpi_trigger", "description": "Asked about an infective trigger", "detection_cues": ["cold", "infection", "fever", "trigger", "unwell"], "weight": 1, "required": false, "red_flag": false },
+        { "id": "risk_smoking", "description": "Quantified smoking", "detection_cues": ["smoke", "cigarette", "pack"], "weight": 1, "required": false, "red_flag": false }
+      ]
+    },
+    "physical_exam": {
+      "weight": 0.15,
+      "items": [
+        { "id": "exam_vitals", "description": "Checked vitals including saturations", "detection_cues": ["vitals", "saturation", "spo2", "respiratory rate"], "weight": 1, "required": true, "red_flag": false },
+        { "id": "exam_chest", "description": "Examined respiratory system", "detection_cues": ["auscultat", "chest", "wheeze", "breath sounds", "percussion"], "weight": 1, "required": true, "red_flag": false }
+      ]
+    },
+    "investigations": {
+      "weight": 0.2,
+      "expected": ["Arterial Blood Gas", "Chest X-Ray", "Complete Blood Count", "C-Reactive Protein"],
+      "not_indicated": ["D-Dimer"]
+    },
+    "diagnosis": {
+      "weight": 0.2,
+      "accepted": ["Acute infective exacerbation of COPD", "Exacerbation of COPD", "Infective exacerbation of COPD", "COPD exacerbation"],
+      "acceptable_differentials": ["Pneumonia", "Heart failure", "Pulmonary embolism", "Pneumothorax"]
+    },
+    "treatment": {
+      "weight": 0.15,
+      "items": [
+        { "id": "tx_controlled_o2", "description": "Controlled oxygen (target 88-92%)", "detection_cues": ["oxygen", "venturi", "88", "92", "controlled", "target"], "weight": 1, "required": true, "red_flag": true },
+        { "id": "tx_nebs_steroids", "description": "Nebulisers and steroids", "detection_cues": ["nebuliser", "salbutamol", "ipratropium", "steroid", "prednisolone"], "weight": 2, "required": true, "red_flag": false },
+        { "id": "tx_antibiotics", "description": "Antibiotics for purulent sputum", "detection_cues": ["antibiotic", "amoxicillin", "doxycycline"], "weight": 1, "required": false, "red_flag": false }
+      ]
+    },
+    "communication": {
+      "weight": 0.05,
+      "items": [
+        { "id": "comm_explained", "description": "Explained plan to the patient", "detection_cues": ["explain", "tell you", "going to"], "weight": 1, "required": false, "red_flag": false }
+      ]
+    }
+  },
+  "teaching_points": {
+    "pearls": ["Target SpO2 88-92% in COPD to avoid CO2 retention.", "Anthonisen criteria (breathlessness, sputum volume, purulence) guide antibiotics."],
+    "pitfalls": ["Giving high-flow uncontrolled oxygen.", "Missing persistent respiratory acidosis that needs NIV."],
+    "references": ["GOLD / NICE COPD exacerbation guidance"],
+    "learning_objectives": ["Diagnose an infective COPD exacerbation.", "Use controlled oxygen.", "Initiate nebulisers, steroids and antibiotics; know NIV indications."]
+  }
+}

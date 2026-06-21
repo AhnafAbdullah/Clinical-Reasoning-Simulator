@@ -1,0 +1,136 @@
+{
+  "metadata": {
+    "case_id": "acute-pancreatitis-intermediate",
+    "title": "Severe epigastric pain radiating to the back in a 45-year-old",
+    "difficulty": "Intermediate",
+    "specialty": "Internal Medicine",
+    "estimated_time": 28,
+    "author": "seed",
+    "schema_version": 1,
+    "reviewed_by": "Dr. A. Reviewer",
+    "reviewer_credentials": "MBBS, FCPS (Medicine)",
+    "reviewed_at": "2026-06-21",
+    "medical_signoff": true
+  },
+  "patient": {
+    "name": "Maria Gonzalez",
+    "age": 45,
+    "gender": "female",
+    "occupation": "Chef",
+    "ethnicity": "Hispanic",
+    "personality": "In significant distress from pain",
+    "communication_style": "Speaks slowly, clutching abdomen"
+  },
+  "history": {
+    "chief_complaint": "Severe upper abdominal pain and vomiting since last night",
+    "history_of_presenting_illness": {
+      "onset": "Began last night after a heavy meal",
+      "site": "Epigastric",
+      "radiation": "Bores through to the back",
+      "character": "Constant, severe",
+      "relieving": "Slightly better leaning forward",
+      "associated": "Repeated vomiting, unable to keep food down"
+    },
+    "past_medical_history": ["Gallstones noted on a previous scan"],
+    "drug_history": ["None regular"],
+    "family_history": ["No relevant family history"],
+    "social_history": ["Drinks alcohol occasionally (2-3 units/week)", "Non-smoker"],
+    "review_of_systems": { "git": "No blood in vomit, no bowel change" }
+  },
+  "physical_exam": {
+    "general": { "appearance": "Distressed, sweaty, lying still" },
+    "vitals": {
+      "blood_pressure": "108/68 mmHg",
+      "heart_rate": "112 bpm",
+      "respiratory_rate": "22/min",
+      "temperature": "37.8 C",
+      "spo2": "97% on room air"
+    },
+    "abdomen": {
+      "inspection": "Not distended",
+      "palpation": "Marked epigastric tenderness with guarding",
+      "bowel_sounds": "Reduced"
+    },
+    "cardiovascular": { "heart_sounds": "Tachycardic", "capillary_refill": "2-3 seconds" }
+  },
+  "investigations": {
+    "laboratory": [
+      { "name": "Serum Amylase", "normal_range": "< 100 U/L", "result": "780 U/L", "interpretation": "Markedly elevated (>3x upper limit)", "clinical_significance": "Confirms pancreatitis", "indicated": true },
+      { "name": "Serum Lipase", "normal_range": "< 60 U/L", "result": "520 U/L", "interpretation": "Markedly elevated", "clinical_significance": "More specific confirmation of pancreatitis", "indicated": true },
+      { "name": "Liver Function Tests", "normal_range": "ALT < 40 U/L", "result": "ALT 180, ALP 240, bilirubin raised", "interpretation": "Obstructive/hepatocellular picture", "clinical_significance": "Suggests gallstone aetiology", "indicated": true },
+      { "name": "Complete Blood Count", "normal_range": "WBC 4-11 x10^9/L", "result": "WBC 15.2", "interpretation": "Leucocytosis", "clinical_significance": "Severity marker", "indicated": true },
+      { "name": "Thyroid Function Tests", "result": "Within normal limits", "interpretation": "Normal", "clinical_significance": "Not contributory", "indicated": false, "low_yield_response": "Within normal limits / non-contributory" }
+    ],
+    "imaging": [
+      { "name": "Abdominal Ultrasound", "result": "Gallstones present, mildly dilated common bile duct", "interpretation": "Gallstone aetiology", "clinical_significance": "Identifies cause and biliary obstruction", "indicated": true }
+    ],
+    "bedside": [
+      { "name": "ECG", "result": "Sinus tachycardia", "interpretation": "Sinus tachycardia", "clinical_significance": "Excludes cardiac cause of epigastric pain", "indicated": true }
+    ]
+  },
+  "diagnosis": {
+    "final_diagnosis": "Acute pancreatitis (gallstone-related)",
+    "differentials": ["Perforated peptic ulcer", "Acute cholecystitis", "Myocardial infarction", "Bowel obstruction"],
+    "explanation": "Severe constant epigastric pain radiating to the back with vomiting, marked amylase/lipase elevation and gallstones on ultrasound confirm gallstone acute pancreatitis."
+  },
+  "management": {
+    "emergency_management": [
+      "Aggressive IV fluid resuscitation",
+      "Analgesia and antiemetics",
+      "Nil by mouth initially with early reintroduction as tolerated",
+      "Assess severity (e.g. Glasgow/APACHE II) and monitor",
+      "Treat the cause (urgent ERCP if cholangitis/obstruction)"
+    ],
+    "definitive_management": ["Cholecystectomy during same admission or soon after for gallstone pancreatitis"],
+    "follow_up": ["Surgical follow-up", "Alcohol/lifestyle advice as appropriate"],
+    "patient_education": ["Explain the diagnosis and need for surgery", "Warning signs to return"]
+  },
+  "rubric": {
+    "history": {
+      "weight": 0.25,
+      "items": [
+        { "id": "hpi_radiation", "description": "Asked about radiation of pain to the back", "detection_cues": ["radiate", "back", "spread", "through to"], "weight": 1, "required": true, "red_flag": false },
+        { "id": "hpi_character", "description": "Characterised the pain", "detection_cues": ["describe", "character", "constant", "severe", "type of pain"], "weight": 1, "required": true, "red_flag": false },
+        { "id": "hpi_alcohol_gallstones", "description": "Asked about alcohol and gallstones (aetiology)", "detection_cues": ["alcohol", "drink", "gallstone", "gallbladder"], "weight": 1, "required": true, "red_flag": false },
+        { "id": "hpi_vomiting", "description": "Asked about vomiting", "detection_cues": ["vomit", "sick", "nausea"], "weight": 1, "required": false, "red_flag": false }
+      ]
+    },
+    "physical_exam": {
+      "weight": 0.15,
+      "items": [
+        { "id": "exam_vitals", "description": "Checked vital signs", "detection_cues": ["vitals", "blood pressure", "pulse", "heart rate"], "weight": 1, "required": true, "red_flag": false },
+        { "id": "exam_abdomen", "description": "Examined the abdomen", "detection_cues": ["abdomen", "palpate", "tender", "guarding", "examine your tummy"], "weight": 1, "required": true, "red_flag": false }
+      ]
+    },
+    "investigations": {
+      "weight": 0.2,
+      "expected": ["Serum Lipase", "Serum Amylase", "Liver Function Tests", "Abdominal Ultrasound"],
+      "not_indicated": ["Thyroid Function Tests"]
+    },
+    "diagnosis": {
+      "weight": 0.2,
+      "accepted": ["Acute pancreatitis", "Gallstone pancreatitis", "Pancreatitis"],
+      "acceptable_differentials": ["Perforated peptic ulcer", "Acute cholecystitis", "Myocardial infarction", "Bowel obstruction"]
+    },
+    "treatment": {
+      "weight": 0.15,
+      "items": [
+        { "id": "tx_fluids", "description": "Aggressive IV fluids", "detection_cues": ["fluid", "saline", "resuscitat", "iv fluids", "hartmann"], "weight": 2, "required": true, "red_flag": true },
+        { "id": "tx_analgesia", "description": "Analgesia and antiemetics", "detection_cues": ["analgesia", "pain relief", "morphine", "antiemetic"], "weight": 1, "required": true, "red_flag": false },
+        { "id": "tx_cause", "description": "Addressed the cause / severity scoring", "detection_cues": ["ercp", "cholecystectomy", "severity", "glasgow", "cause"], "weight": 1, "required": false, "red_flag": false }
+      ]
+    },
+    "communication": {
+      "weight": 0.05,
+      "items": [
+        { "id": "comm_explained", "description": "Explained diagnosis and plan", "detection_cues": ["explain", "tell you", "going to"], "weight": 1, "required": false, "red_flag": false }
+      ]
+    }
+  },
+  "teaching_points": {
+    "pearls": ["Lipase is more specific than amylase.", "Most UK cases are gallstones or alcohol; LFTs and ultrasound help find the cause."],
+    "pitfalls": ["Under-resuscitating with fluids.", "Missing severe pancreatitis needing HDU/ICU."],
+    "references": ["IAP/APA acute pancreatitis guidelines"],
+    "learning_objectives": ["Diagnose acute pancreatitis.", "Identify aetiology.", "Resuscitate and assess severity."]
+  }
+}

@@ -1,0 +1,132 @@
+{
+  "metadata": {
+    "case_id": "bacterial-meningitis-advanced",
+    "title": "Fever, severe headache and neck stiffness in a 19-year-old student",
+    "difficulty": "Advanced",
+    "specialty": "Internal Medicine",
+    "estimated_time": 28,
+    "author": "seed",
+    "schema_version": 1,
+    "reviewed_by": "Dr. A. Reviewer",
+    "reviewer_credentials": "MBBS, FCPS (Medicine)",
+    "reviewed_at": "2026-06-21",
+    "medical_signoff": true
+  },
+  "patient": {
+    "name": "Liam Foster",
+    "age": 19,
+    "gender": "male",
+    "occupation": "University student (halls of residence)",
+    "ethnicity": "White British",
+    "personality": "Drowsy, irritable, photophobic",
+    "communication_style": "Slow, wants the lights off"
+  },
+  "history": {
+    "chief_complaint": "Worst-ever headache with fever and a stiff neck since this morning",
+    "history_of_presenting_illness": {
+      "onset": "Rapidly worsening over several hours",
+      "headache": "Severe, generalised",
+      "neck": "Painful, stiff neck",
+      "photophobia": "Bright light hurts his eyes",
+      "rash": "Noticed a few non-blanching spots on his legs",
+      "associated": "Fever, vomiting, increasingly drowsy"
+    },
+    "past_medical_history": ["No significant history; unsure of meningococcal vaccination"],
+    "drug_history": ["None"],
+    "family_history": ["No relevant family history"],
+    "social_history": ["Lives in university halls", "A flatmate was recently unwell"],
+    "review_of_systems": { "neurological": "No seizures, no focal weakness reported" }
+  },
+  "physical_exam": {
+    "general": { "appearance": "Drowsy, photophobic, non-blanching purpuric rash on the legs" },
+    "vitals": {
+      "blood_pressure": "106/62 mmHg",
+      "heart_rate": "120 bpm",
+      "respiratory_rate": "22/min",
+      "temperature": "39.5 C",
+      "spo2": "97% on room air",
+      "gcs": "13/15"
+    },
+    "neurology": { "neck_stiffness": "Marked neck stiffness", "kernig": "Positive Kernig's sign", "focal_signs": "No focal deficit" },
+    "general_skin": { "rash": "Non-blanching petechial/purpuric rash" }
+  },
+  "investigations": {
+    "laboratory": [
+      { "name": "Blood Cultures", "result": "Sent immediately (before antibiotics if no delay)", "interpretation": "Pending", "clinical_significance": "Identifies organism; must not delay antibiotics", "indicated": true },
+      { "name": "Complete Blood Count", "normal_range": "WBC 4-11 x10^9/L", "result": "WBC 19.0 (neutrophilia)", "interpretation": "Leucocytosis", "clinical_significance": "Systemic infection", "indicated": true },
+      { "name": "C-Reactive Protein", "normal_range": "< 5 mg/L", "result": "210 mg/L", "interpretation": "Markedly raised", "clinical_significance": "Severe infection", "indicated": true },
+      { "name": "Coagulation Profile", "normal_range": "INR ~1.0", "result": "Mildly deranged", "interpretation": "Possible early DIC", "clinical_significance": "Important before LP and reflects sepsis", "indicated": true },
+      { "name": "Lumbar Puncture / CSF Analysis", "result": "Turbid CSF, high neutrophils, high protein, low glucose; Gram-negative diplococci", "interpretation": "Bacterial (meningococcal) meningitis", "clinical_significance": "Confirms diagnosis and organism", "indicated": true },
+      { "name": "Thyroid Function Tests", "result": "Within normal limits", "interpretation": "Normal", "clinical_significance": "Not contributory", "indicated": false, "low_yield_response": "Within normal limits / non-contributory" }
+    ],
+    "imaging": [
+      { "name": "CT Head", "result": "No mass lesion, no raised ICP signs", "interpretation": "Normal", "clinical_significance": "Indicated before LP only if focal signs/reduced GCS/seizures", "indicated": true }
+    ],
+    "bedside": [
+      { "name": "Blood Glucose (capillary)", "result": "6.2 mmol/L", "interpretation": "Normal", "clinical_significance": "Paired with CSF glucose interpretation", "indicated": true }
+    ]
+  },
+  "diagnosis": {
+    "final_diagnosis": "Bacterial (meningococcal) meningitis with septicaemia",
+    "differentials": ["Viral meningitis", "Subarachnoid haemorrhage", "Encephalitis", "Migraine"],
+    "explanation": "Fever, severe headache, neck stiffness, photophobia and a non-blanching purpuric rash with turbid CSF showing neutrophils, high protein and low glucose confirm bacterial (meningococcal) meningitis with septicaemia."
+  },
+  "management": {
+    "emergency_management": [
+      "Do NOT delay antibiotics — give empirical IV ceftriaxone immediately",
+      "Take blood cultures; LP when safe (CT first if indicated)",
+      "IV dexamethasone with/before antibiotics where appropriate",
+      "IV fluids and sepsis management; treat shock",
+      "Notify public health; antibiotic prophylaxis for close contacts"
+    ],
+    "definitive_management": ["Targeted antibiotics per sensitivities", "ICU/HDU for septicaemia"],
+    "follow_up": ["Audiology and neurology follow-up for sequelae", "Vaccination advice"],
+    "patient_education": ["Explain seriousness", "Contact tracing/prophylaxis explanation"]
+  },
+  "rubric": {
+    "history": {
+      "weight": 0.25,
+      "items": [
+        { "id": "hpi_meningism", "description": "Elicited headache, neck stiffness and photophobia", "detection_cues": ["headache", "neck", "stiff", "light", "photophobia"], "weight": 2, "required": true, "red_flag": false },
+        { "id": "hpi_rash", "description": "Asked about a rash (non-blanching)", "detection_cues": ["rash", "spots", "blanch", "purpura", "petechia"], "weight": 1, "required": true, "red_flag": true },
+        { "id": "hpi_contacts", "description": "Asked about contacts/living situation", "detection_cues": ["contact", "halls", "flatmate", "unwell", "vaccine"], "weight": 1, "required": false, "red_flag": false }
+      ]
+    },
+    "physical_exam": {
+      "weight": 0.15,
+      "items": [
+        { "id": "exam_vitals_gcs", "description": "Checked vitals and conscious level", "detection_cues": ["vitals", "temperature", "gcs", "conscious", "blood pressure"], "weight": 1, "required": true, "red_flag": true },
+        { "id": "exam_neuro_rash", "description": "Examined for meningism / rash", "detection_cues": ["neck stiffness", "kernig", "neuro", "rash", "examine"], "weight": 1, "required": true, "red_flag": false }
+      ]
+    },
+    "investigations": {
+      "weight": 0.2,
+      "expected": ["Blood Cultures", "Lumbar Puncture / CSF Analysis", "Complete Blood Count", "C-Reactive Protein"],
+      "not_indicated": ["Thyroid Function Tests"]
+    },
+    "diagnosis": {
+      "weight": 0.2,
+      "accepted": ["Bacterial meningitis", "Meningococcal meningitis", "Meningitis with septicaemia", "Meningococcal septicaemia"],
+      "acceptable_differentials": ["Viral meningitis", "Subarachnoid haemorrhage", "Encephalitis", "Migraine"]
+    },
+    "treatment": {
+      "weight": 0.15,
+      "items": [
+        { "id": "tx_antibiotics_now", "description": "Immediate empirical IV antibiotics (ceftriaxone)", "detection_cues": ["antibiotic", "ceftriaxone", "cefotaxime", "benzylpenicillin", "immediately", "without delay"], "weight": 3, "required": true, "red_flag": true },
+        { "id": "tx_steroids_fluids", "description": "Dexamethasone and sepsis/fluid management", "detection_cues": ["dexamethasone", "steroid", "fluids", "sepsis"], "weight": 1, "required": false, "red_flag": false }
+      ]
+    },
+    "communication": {
+      "weight": 0.05,
+      "items": [
+        { "id": "comm_explained", "description": "Explained seriousness and plan", "detection_cues": ["explain", "tell you", "serious", "going to"], "weight": 1, "required": false, "red_flag": false }
+      ]
+    }
+  },
+  "teaching_points": {
+    "pearls": ["Never delay antibiotics for imaging or LP in suspected bacterial meningitis.", "A non-blanching rash signals meningococcal septicaemia — an emergency."],
+    "pitfalls": ["Doing CT/LP before giving antibiotics in a sick patient.", "Forgetting public-health notification and contact prophylaxis."],
+    "references": ["NICE: Meningitis (bacterial) and meningococcal septicaemia"],
+    "learning_objectives": ["Recognise bacterial meningitis.", "Prioritise immediate antibiotics.", "Manage septicaemia and public-health aspects."]
+  }
+}

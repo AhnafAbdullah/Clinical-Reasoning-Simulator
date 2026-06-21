@@ -1,0 +1,136 @@
+{
+  "metadata": {
+    "case_id": "cap-basic",
+    "title": "Productive cough and fever in a 67-year-old man",
+    "difficulty": "Basic",
+    "specialty": "Internal Medicine",
+    "estimated_time": 25,
+    "author": "seed",
+    "schema_version": 1,
+    "reviewed_by": "Dr. A. Reviewer",
+    "reviewer_credentials": "MBBS, FCPS (Medicine)",
+    "reviewed_at": "2026-06-21",
+    "medical_signoff": true
+  },
+  "patient": {
+    "name": "George Mason",
+    "age": 67,
+    "gender": "male",
+    "occupation": "Retired teacher",
+    "ethnicity": "White British",
+    "personality": "Cooperative but breathless",
+    "communication_style": "Speaks in short sentences due to breathlessness"
+  },
+  "history": {
+    "chief_complaint": "Cough with green phlegm and fever for 3 days",
+    "history_of_presenting_illness": {
+      "onset": "Three days ago, worsening",
+      "cough": "Productive of green/yellow sputum",
+      "fever": "Felt hot and shivery, sweats at night",
+      "breathlessness": "Short of breath on mild exertion",
+      "pain": "Sharp right-sided chest pain, worse on deep breath (pleuritic)",
+      "associated": "Reduced appetite, generally weak"
+    },
+    "past_medical_history": ["Hypertension", "Ex-smoker (20 pack-years, quit 10 years ago)"],
+    "drug_history": ["Amlodipine 5 mg daily"],
+    "family_history": ["No relevant family history"],
+    "social_history": ["Lives with wife", "Minimal alcohol"],
+    "review_of_systems": { "cardiovascular": "No leg swelling", "git": "No vomiting" }
+  },
+  "physical_exam": {
+    "general": { "appearance": "Flushed, mildly breathless at rest" },
+    "vitals": {
+      "blood_pressure": "118/74 mmHg",
+      "heart_rate": "104 bpm",
+      "respiratory_rate": "26/min",
+      "temperature": "38.7 C",
+      "spo2": "91% on room air"
+    },
+    "respiratory": {
+      "inspection": "Reduced expansion on the right",
+      "percussion": "Dull at the right base",
+      "auscultation": "Bronchial breathing and coarse crackles at the right base"
+    },
+    "cardiovascular": { "heart_sounds": "Normal, tachycardic" },
+    "abdomen": { "examination": "Soft, non-tender" }
+  },
+  "investigations": {
+    "laboratory": [
+      { "name": "Complete Blood Count", "normal_range": "WBC 4-11 x10^9/L", "result": "WBC 16.5 (neutrophilia)", "interpretation": "Leucocytosis", "clinical_significance": "Supports bacterial infection", "indicated": true },
+      { "name": "C-Reactive Protein", "normal_range": "< 5 mg/L", "result": "188 mg/L", "interpretation": "Markedly raised", "clinical_significance": "Marker of infection/inflammation", "indicated": true },
+      { "name": "Urea & Electrolytes", "normal_range": "Urea 2.5-7.8 mmol/L", "result": "Urea 7.0, creatinine 92, Na 137", "interpretation": "Near normal", "clinical_significance": "Part of CURB-65 severity scoring", "indicated": true },
+      { "name": "Thyroid Function Tests", "result": "Within normal limits", "interpretation": "Normal", "clinical_significance": "Not contributory", "indicated": false, "low_yield_response": "Within normal limits / non-contributory" }
+    ],
+    "imaging": [
+      { "name": "Chest X-Ray", "result": "Right lower zone consolidation", "interpretation": "Lobar pneumonia", "clinical_significance": "Confirms pneumonia", "indicated": true }
+    ],
+    "bedside": [
+      { "name": "Sputum Culture", "result": "Pending; Gram-positive diplococci on Gram stain", "interpretation": "Suggestive of Streptococcus pneumoniae", "clinical_significance": "Guides targeted therapy", "indicated": true },
+      { "name": "ECG", "result": "Sinus tachycardia", "interpretation": "Sinus tachycardia", "clinical_significance": "Non-specific", "indicated": false, "low_yield_response": "Sinus tachycardia only / non-contributory" }
+    ]
+  },
+  "diagnosis": {
+    "final_diagnosis": "Community-acquired pneumonia",
+    "differentials": ["Acute bronchitis", "Pulmonary embolism", "Heart failure", "Lung cancer"],
+    "explanation": "Productive cough, fever, pleuritic pain with focal bronchial breathing and crackles, raised inflammatory markers and lobar consolidation on chest X-ray confirm community-acquired pneumonia."
+  },
+  "management": {
+    "emergency_management": [
+      "Controlled oxygen to maintain SpO2 94-98%",
+      "Assess severity with CURB-65",
+      "Empirical antibiotics (e.g. amoxicillin; add a macrolide if moderate-severe)",
+      "Fluids and analgesia/antipyretics"
+    ],
+    "definitive_management": ["De-escalate antibiotics to culture results", "Review response at 48-72 hours"],
+    "follow_up": ["Repeat chest X-ray at 6 weeks to ensure resolution", "Smoking-cessation reinforcement"],
+    "patient_education": ["Complete the antibiotic course", "Seek help if breathlessness worsens"]
+  },
+  "rubric": {
+    "history": {
+      "weight": 0.25,
+      "items": [
+        { "id": "hpi_sputum", "description": "Asked about sputum colour/production", "detection_cues": ["sputum", "phlegm", "cough up", "colour", "green", "yellow"], "weight": 1, "required": true, "red_flag": false },
+        { "id": "hpi_fever", "description": "Elicited fever / systemic symptoms", "detection_cues": ["fever", "temperature", "hot", "shiver", "sweat"], "weight": 1, "required": true, "red_flag": false },
+        { "id": "hpi_pleuritic", "description": "Characterised pleuritic chest pain", "detection_cues": ["chest pain", "breathing", "deep breath", "pleuritic", "worse on"], "weight": 1, "required": false, "red_flag": false },
+        { "id": "risk_smoking", "description": "Asked about smoking history", "detection_cues": ["smoke", "cigarette", "tobacco", "pack"], "weight": 1, "required": false, "red_flag": false }
+      ]
+    },
+    "physical_exam": {
+      "weight": 0.15,
+      "items": [
+        { "id": "exam_vitals", "description": "Checked vital signs including saturations", "detection_cues": ["vitals", "saturation", "spo2", "respiratory rate", "temperature"], "weight": 1, "required": true, "red_flag": false },
+        { "id": "exam_chest", "description": "Examined the respiratory system", "detection_cues": ["auscultat", "chest", "crackles", "percussion", "breath sounds"], "weight": 1, "required": true, "red_flag": false }
+      ]
+    },
+    "investigations": {
+      "weight": 0.2,
+      "expected": ["Chest X-Ray", "Complete Blood Count", "C-Reactive Protein", "Urea & Electrolytes"],
+      "not_indicated": ["Thyroid Function Tests", "ECG"]
+    },
+    "diagnosis": {
+      "weight": 0.2,
+      "accepted": ["Community-acquired pneumonia", "Pneumonia", "CAP"],
+      "acceptable_differentials": ["Acute bronchitis", "Pulmonary embolism", "Heart failure", "Lung cancer"]
+    },
+    "treatment": {
+      "weight": 0.15,
+      "items": [
+        { "id": "tx_antibiotics", "description": "Started empirical antibiotics", "detection_cues": ["antibiotic", "amoxicillin", "penicillin", "macrolide"], "weight": 2, "required": true, "red_flag": true },
+        { "id": "tx_oxygen", "description": "Gave oxygen / supportive care", "detection_cues": ["oxygen", "o2", "saturation", "fluids"], "weight": 1, "required": false, "red_flag": false },
+        { "id": "tx_severity", "description": "Assessed severity (CURB-65)", "detection_cues": ["curb", "severity", "score"], "weight": 1, "required": false, "red_flag": false }
+      ]
+    },
+    "communication": {
+      "weight": 0.05,
+      "items": [
+        { "id": "comm_explained", "description": "Explained diagnosis and plan", "detection_cues": ["explain", "tell you", "going to"], "weight": 1, "required": false, "red_flag": false }
+      ]
+    }
+  },
+  "teaching_points": {
+    "pearls": ["Use CURB-65 to guide admission and antibiotic choice.", "Focal bronchial breathing strongly suggests consolidation."],
+    "pitfalls": ["Missing sepsis in the elderly who may be afebrile.", "Forgetting the 6-week follow-up film to exclude an underlying malignancy."],
+    "references": ["BTS Guidelines for community-acquired pneumonia"],
+    "learning_objectives": ["Recognise typical CAP.", "Apply CURB-65.", "Choose appropriate empirical antibiotics."]
+  }
+}

@@ -1,0 +1,126 @@
+{
+  "metadata": {
+    "case_id": "anaphylaxis-basic",
+    "title": "Sudden rash and breathlessness after eating at a restaurant",
+    "difficulty": "Basic",
+    "specialty": "Internal Medicine",
+    "estimated_time": 20,
+    "author": "seed",
+    "schema_version": 1,
+    "reviewed_by": "Dr. A. Reviewer",
+    "reviewer_credentials": "MBBS, FCPS (Medicine)",
+    "reviewed_at": "2026-06-21",
+    "medical_signoff": true
+  },
+  "patient": {
+    "name": "Aisha Rahman",
+    "age": 29,
+    "gender": "female",
+    "occupation": "Graphic designer",
+    "ethnicity": "South Asian",
+    "personality": "Frightened, anxious",
+    "communication_style": "Speaks quickly, sounds hoarse and wheezy"
+  },
+  "history": {
+    "chief_complaint": "Itchy rash, swollen lips and trouble breathing that started minutes ago",
+    "history_of_presenting_illness": {
+      "onset": "About 15 minutes after eating a peanut-containing dish",
+      "skin": "Widespread itchy hives, swollen lips and tongue",
+      "breathing": "Throat tightness, wheeze, difficulty breathing",
+      "circulation": "Feels lightheaded and faint",
+      "trigger": "Known peanut allergy; ate satay at a restaurant"
+    },
+    "past_medical_history": ["Peanut allergy", "Mild asthma"],
+    "drug_history": ["Salbutamol inhaler PRN"],
+    "family_history": ["Mother has eczema"],
+    "social_history": ["Non-smoker"],
+    "review_of_systems": { "git": "Mild abdominal cramps and nausea" }
+  },
+  "physical_exam": {
+    "general": { "appearance": "Anxious, flushed with widespread urticaria, peri-oral swelling" },
+    "vitals": {
+      "blood_pressure": "88/54 mmHg",
+      "heart_rate": "122 bpm",
+      "respiratory_rate": "28/min",
+      "temperature": "36.9 C",
+      "spo2": "93% on room air"
+    },
+    "respiratory": { "auscultation": "Widespread expiratory wheeze, mild stridor" },
+    "cardiovascular": { "heart_sounds": "Tachycardic, no murmurs", "capillary_refill": "3 seconds" }
+  },
+  "investigations": {
+    "laboratory": [
+      { "name": "Serum Tryptase", "normal_range": "< 11.4 ng/mL", "result": "Elevated (sample taken)", "interpretation": "Supports mast-cell activation", "clinical_significance": "Confirms anaphylaxis retrospectively; does NOT delay treatment", "indicated": true },
+      { "name": "Thyroid Function Tests", "result": "Within normal limits", "interpretation": "Normal", "clinical_significance": "Not contributory", "indicated": false, "low_yield_response": "Within normal limits / non-contributory" }
+    ],
+    "imaging": [
+      { "name": "Chest X-Ray", "result": "Hyperinflation, no consolidation", "interpretation": "Non-specific", "clinical_significance": "Not required acutely", "indicated": false, "low_yield_response": "No acute abnormality / non-contributory" }
+    ],
+    "bedside": [
+      { "name": "ECG", "result": "Sinus tachycardia", "interpretation": "Sinus tachycardia", "clinical_significance": "Monitor during treatment", "indicated": true }
+    ]
+  },
+  "diagnosis": {
+    "final_diagnosis": "Anaphylaxis",
+    "differentials": ["Acute asthma exacerbation", "Vasovagal syncope", "Panic attack", "Angioedema (non-allergic)"],
+    "explanation": "Rapid-onset airway (throat tightness, stridor), breathing (wheeze) and circulatory (hypotension) compromise with urticaria minutes after a known allergen exposure is diagnostic of anaphylaxis."
+  },
+  "management": {
+    "emergency_management": [
+      "Remove trigger, call for help, lie flat with legs raised",
+      "Intramuscular adrenaline 0.5 mg (1:1000) into the anterolateral thigh, repeat after 5 minutes if needed",
+      "High-flow oxygen",
+      "IV fluid bolus for hypotension",
+      "Adjuncts after adrenaline: antihistamine and consider steroids"
+    ],
+    "definitive_management": ["Observe for biphasic reaction", "Refer to allergy/immunology"],
+    "follow_up": ["Prescribe adrenaline auto-injectors and train use", "Allergen avoidance advice"],
+    "patient_education": ["Carry two auto-injectors", "Recognise early anaphylaxis", "Wear a medical-alert bracelet"]
+  },
+  "rubric": {
+    "history": {
+      "weight": 0.25,
+      "items": [
+        { "id": "hpi_trigger", "description": "Identified the allergen trigger/exposure", "detection_cues": ["trigger", "allergy", "peanut", "ate", "food", "exposure"], "weight": 2, "required": true, "red_flag": false },
+        { "id": "hpi_airway", "description": "Asked about airway/breathing symptoms", "detection_cues": ["throat", "breathing", "wheeze", "swallow", "tight", "voice"], "weight": 1, "required": true, "red_flag": true },
+        { "id": "hpi_onset", "description": "Established rapid onset", "detection_cues": ["onset", "when", "how quickly", "minutes", "sudden"], "weight": 1, "required": false, "red_flag": false }
+      ]
+    },
+    "physical_exam": {
+      "weight": 0.15,
+      "items": [
+        { "id": "exam_vitals", "description": "Checked vital signs (BP, SpO2)", "detection_cues": ["vitals", "blood pressure", "saturation", "spo2", "pulse"], "weight": 1, "required": true, "red_flag": true },
+        { "id": "exam_airway", "description": "Assessed airway and chest", "detection_cues": ["airway", "auscultat", "chest", "stridor", "wheeze"], "weight": 1, "required": true, "red_flag": false }
+      ]
+    },
+    "investigations": {
+      "weight": 0.2,
+      "expected": ["Serum Tryptase", "ECG"],
+      "not_indicated": ["Thyroid Function Tests", "Chest X-Ray"]
+    },
+    "diagnosis": {
+      "weight": 0.2,
+      "accepted": ["Anaphylaxis", "Anaphylactic reaction"],
+      "acceptable_differentials": ["Acute asthma exacerbation", "Vasovagal syncope", "Panic attack", "Angioedema (non-allergic)"]
+    },
+    "treatment": {
+      "weight": 0.15,
+      "items": [
+        { "id": "tx_adrenaline", "description": "Gave IM adrenaline", "detection_cues": ["adrenaline", "epinephrine", "im", "auto-injector", "epipen"], "weight": 3, "required": true, "red_flag": true },
+        { "id": "tx_oxygen_fluids", "description": "Oxygen and IV fluids", "detection_cues": ["oxygen", "fluids", "saline", "bolus"], "weight": 1, "required": false, "red_flag": false }
+      ]
+    },
+    "communication": {
+      "weight": 0.05,
+      "items": [
+        { "id": "comm_explained", "description": "Explained the emergency and plan", "detection_cues": ["explain", "tell you", "going to give"], "weight": 1, "required": false, "red_flag": false }
+      ]
+    }
+  },
+  "teaching_points": {
+    "pearls": ["Adrenaline is first-line and life-saving — give it IM early, do not delay for tests.", "Antihistamines and steroids are adjuncts, never a substitute for adrenaline."],
+    "pitfalls": ["Giving IV adrenaline in a peri-arrest error / wrong dose.", "Discharging too early — biphasic reactions occur."],
+    "references": ["Resuscitation Council UK: Emergency treatment of anaphylaxis"],
+    "learning_objectives": ["Recognise anaphylaxis by ABC + skin + exposure.", "Deliver IM adrenaline correctly.", "Arrange auto-injectors and follow-up."]
+  }
+}

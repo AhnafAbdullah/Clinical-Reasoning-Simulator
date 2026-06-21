@@ -1,0 +1,130 @@
+{
+  "metadata": {
+    "case_id": "pulmonary-embolism-advanced",
+    "title": "Pleuritic chest pain and breathlessness after a long flight",
+    "difficulty": "Advanced",
+    "specialty": "Internal Medicine",
+    "estimated_time": 30,
+    "author": "seed",
+    "schema_version": 1,
+    "reviewed_by": "Dr. A. Reviewer",
+    "reviewer_credentials": "MBBS, FCPS (Medicine)",
+    "reviewed_at": "2026-06-21",
+    "medical_signoff": true
+  },
+  "patient": {
+    "name": "Tomasz Kowalski",
+    "age": 52,
+    "gender": "male",
+    "occupation": "Software consultant",
+    "ethnicity": "White Polish",
+    "personality": "Anxious about his breathing",
+    "communication_style": "Breathless, cooperative"
+  },
+  "history": {
+    "chief_complaint": "Sudden sharp chest pain and breathlessness since this morning",
+    "history_of_presenting_illness": {
+      "onset": "Sudden onset this morning",
+      "pain": "Right-sided, sharp, worse on deep breathing (pleuritic)",
+      "breathlessness": "Came on suddenly, worse on exertion",
+      "leg": "Left calf has been swollen and tender for 3 days",
+      "associated": "Coughed up a small amount of blood (haemoptysis), palpitations"
+    },
+    "past_medical_history": ["No prior clots"],
+    "drug_history": ["None regular"],
+    "family_history": ["Father had a DVT"],
+    "social_history": ["Returned from a 10-hour flight 4 days ago", "Non-smoker"],
+    "review_of_systems": { "cardiovascular": "Palpitations", "respiratory": "No fever" }
+  },
+  "physical_exam": {
+    "general": { "appearance": "Mildly distressed, breathless on talking" },
+    "vitals": {
+      "blood_pressure": "118/76 mmHg",
+      "heart_rate": "116 bpm",
+      "respiratory_rate": "26/min",
+      "temperature": "37.2 C",
+      "spo2": "90% on room air"
+    },
+    "respiratory": { "auscultation": "Chest clear, tachypnoeic" },
+    "cardiovascular": { "heart_sounds": "Tachycardic", "jvp": "Mildly raised" },
+    "extremities": { "examination": "Left calf swollen, warm and tender (>3 cm larger than right)" }
+  },
+  "investigations": {
+    "laboratory": [
+      { "name": "D-Dimer", "normal_range": "< 500 ng/mL", "result": "2200 ng/mL", "interpretation": "Markedly raised", "clinical_significance": "Supports thromboembolism in a non-low pre-test probability patient", "indicated": true },
+      { "name": "Arterial Blood Gas", "normal_range": "PaO2 11-13 kPa", "result": "PaO2 8.0 kPa, low PaCO2 (respiratory alkalosis)", "interpretation": "Type 1 respiratory failure with hypocapnia", "clinical_significance": "Consistent with PE", "indicated": true },
+      { "name": "Troponin I", "normal_range": "< 0.04 ng/mL", "result": "Mildly raised", "interpretation": "RV strain marker", "clinical_significance": "Risk-stratifies PE severity", "indicated": true },
+      { "name": "Thyroid Function Tests", "result": "Within normal limits", "interpretation": "Normal", "clinical_significance": "Not contributory", "indicated": false, "low_yield_response": "Within normal limits / non-contributory" }
+    ],
+    "imaging": [
+      { "name": "CT Pulmonary Angiogram", "result": "Filling defects in the right lower lobe pulmonary arteries", "interpretation": "Acute pulmonary embolism", "clinical_significance": "Confirms PE", "indicated": true },
+      { "name": "Chest X-Ray", "result": "Largely normal", "interpretation": "Normal", "clinical_significance": "Excludes pneumonia/pneumothorax before CTPA", "indicated": true }
+    ],
+    "bedside": [
+      { "name": "ECG", "result": "Sinus tachycardia; S1Q3T3 pattern", "interpretation": "Right heart strain", "clinical_significance": "Supports PE, not diagnostic", "indicated": true }
+    ]
+  },
+  "diagnosis": {
+    "final_diagnosis": "Acute pulmonary embolism",
+    "differentials": ["Pneumonia", "Acute coronary syndrome", "Pneumothorax", "Musculoskeletal chest pain"],
+    "explanation": "Sudden pleuritic chest pain, breathlessness, haemoptysis and hypoxia with a swollen tender calf and recent long-haul flight (high Wells score), confirmed by filling defects on CTPA, indicate acute pulmonary embolism."
+  },
+  "management": {
+    "emergency_management": [
+      "Oxygen to maintain saturations",
+      "Risk-stratify (Wells score; haemodynamic stability)",
+      "Start therapeutic anticoagulation (e.g. LMWH or a DOAC) promptly",
+      "Consider thrombolysis only if massive PE with haemodynamic instability",
+      "Analgesia"
+    ],
+    "definitive_management": ["Continue anticoagulation; choose duration by provoked/unprovoked status", "Investigate for provoking factors"],
+    "follow_up": ["Anticoagulation review", "Consider thrombophilia/malignancy screen if unprovoked"],
+    "patient_education": ["Anticoagulation safety", "Recognise recurrence", "Flight VTE prevention"]
+  },
+  "rubric": {
+    "history": {
+      "weight": 0.25,
+      "items": [
+        { "id": "hpi_risk_factors", "description": "Elicited VTE risk factors (immobility/flight/family)", "detection_cues": ["flight", "immobile", "travel", "surgery", "family", "clot", "long journey"], "weight": 2, "required": true, "red_flag": false },
+        { "id": "hpi_leg", "description": "Asked about leg swelling/DVT", "detection_cues": ["leg", "calf", "swelling", "dvt", "tender"], "weight": 1, "required": true, "red_flag": true },
+        { "id": "hpi_haemoptysis", "description": "Asked about haemoptysis/pleuritic pain", "detection_cues": ["cough up blood", "haemoptysis", "pleuritic", "deep breath", "sharp"], "weight": 1, "required": false, "red_flag": false }
+      ]
+    },
+    "physical_exam": {
+      "weight": 0.15,
+      "items": [
+        { "id": "exam_vitals", "description": "Checked vitals (saturations, HR)", "detection_cues": ["vitals", "saturation", "spo2", "heart rate", "respiratory rate"], "weight": 1, "required": true, "red_flag": false },
+        { "id": "exam_legs", "description": "Examined the legs/calves", "detection_cues": ["leg", "calf", "extremit", "examine your leg", "swelling"], "weight": 1, "required": true, "red_flag": false }
+      ]
+    },
+    "investigations": {
+      "weight": 0.2,
+      "expected": ["CT Pulmonary Angiogram", "D-Dimer", "Arterial Blood Gas", "ECG"],
+      "not_indicated": ["Thyroid Function Tests"]
+    },
+    "diagnosis": {
+      "weight": 0.2,
+      "accepted": ["Acute pulmonary embolism", "Pulmonary embolism", "PE"],
+      "acceptable_differentials": ["Pneumonia", "Acute coronary syndrome", "Pneumothorax", "Musculoskeletal chest pain"]
+    },
+    "treatment": {
+      "weight": 0.15,
+      "items": [
+        { "id": "tx_anticoagulation", "description": "Started therapeutic anticoagulation", "detection_cues": ["anticoagul", "heparin", "lmwh", "doac", "apixaban", "rivaroxaban", "enoxaparin"], "weight": 3, "required": true, "red_flag": true },
+        { "id": "tx_oxygen_risk", "description": "Oxygen and risk stratification", "detection_cues": ["oxygen", "wells", "risk", "stratif", "thrombolysis"], "weight": 1, "required": false, "red_flag": false }
+      ]
+    },
+    "communication": {
+      "weight": 0.05,
+      "items": [
+        { "id": "comm_explained", "description": "Explained diagnosis and plan", "detection_cues": ["explain", "tell you", "going to"], "weight": 1, "required": false, "red_flag": false }
+      ]
+    }
+  },
+  "teaching_points": {
+    "pearls": ["Use the Wells score to decide D-dimer vs straight-to-CTPA.", "Don't delay anticoagulation while awaiting imaging if probability is high."],
+    "pitfalls": ["Sending a D-dimer in a high-probability patient (poor specificity).", "Missing massive PE needing thrombolysis."],
+    "references": ["NICE: Venous thromboembolic diseases"],
+    "learning_objectives": ["Risk-stratify suspected PE.", "Choose appropriate imaging.", "Anticoagulate and recognise massive PE."]
+  }
+}

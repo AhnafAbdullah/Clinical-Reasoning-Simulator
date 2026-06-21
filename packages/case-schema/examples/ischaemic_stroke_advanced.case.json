@@ -1,0 +1,133 @@
+{
+  "metadata": {
+    "case_id": "ischaemic-stroke-advanced",
+    "title": "Sudden right-sided weakness and slurred speech in a 68-year-old",
+    "difficulty": "Advanced",
+    "specialty": "Internal Medicine",
+    "estimated_time": 28,
+    "author": "seed",
+    "schema_version": 1,
+    "reviewed_by": "Dr. A. Reviewer",
+    "reviewer_credentials": "MBBS, FCPS (Medicine)",
+    "reviewed_at": "2026-06-21",
+    "medical_signoff": true
+  },
+  "patient": {
+    "name": "Robert Nkemelu",
+    "age": 68,
+    "gender": "male",
+    "occupation": "Retired accountant",
+    "ethnicity": "Black African",
+    "personality": "Worried, frustrated by speech difficulty",
+    "communication_style": "Slurred speech (dysarthria); answers are short"
+  },
+  "history": {
+    "chief_complaint": "Sudden weakness of the right arm and leg with slurred speech",
+    "history_of_presenting_illness": {
+      "onset": "Sudden, witnessed by wife; last seen well 90 minutes ago",
+      "deficit": "Right arm and leg weakness, facial droop, slurred speech",
+      "time": "Symptoms began 90 minutes ago and are persisting",
+      "associated": "No headache, no seizure, no loss of consciousness"
+    },
+    "past_medical_history": ["Atrial fibrillation (not on anticoagulation)", "Hypertension", "Type 2 diabetes"],
+    "drug_history": ["Amlodipine", "Metformin", "NOT on any anticoagulant"],
+    "family_history": ["No relevant family history"],
+    "social_history": ["Ex-smoker"],
+    "review_of_systems": { "cardiovascular": "Known irregular pulse" }
+  },
+  "physical_exam": {
+    "general": { "appearance": "Alert, right facial droop, dysarthric" },
+    "vitals": {
+      "blood_pressure": "176/94 mmHg",
+      "heart_rate": "96 bpm irregular",
+      "respiratory_rate": "16/min",
+      "temperature": "36.8 C",
+      "spo2": "97% on room air",
+      "capillary_glucose": "7.1 mmol/L"
+    },
+    "neurology": {
+      "face": "Right facial weakness (forehead spared)",
+      "limbs": "Right arm and leg weakness (power 2/5)",
+      "speech": "Dysarthria, no aphasia",
+      "nihss": "Moderate deficit"
+    },
+    "cardiovascular": { "pulse": "Irregularly irregular", "heart_sounds": "Variable intensity" }
+  },
+  "investigations": {
+    "laboratory": [
+      { "name": "Capillary Blood Glucose", "normal_range": "4-7 mmol/L", "result": "7.1 mmol/L", "interpretation": "Normal", "clinical_significance": "Excludes hypoglycaemia mimicking stroke", "indicated": true },
+      { "name": "Coagulation Profile", "normal_range": "INR ~1.0", "result": "INR 1.0, platelets normal", "interpretation": "Normal", "clinical_significance": "Required before thrombolysis", "indicated": true },
+      { "name": "Complete Blood Count", "normal_range": "WBC 4-11 x10^9/L", "result": "Normal", "interpretation": "Normal", "clinical_significance": "Baseline / excludes thrombocytopenia", "indicated": true },
+      { "name": "Thyroid Function Tests", "result": "Within normal limits", "interpretation": "Normal", "clinical_significance": "Not contributory acutely", "indicated": false, "low_yield_response": "Within normal limits / non-contributory" }
+    ],
+    "imaging": [
+      { "name": "CT Head", "result": "No haemorrhage; early ischaemic changes in the left MCA territory", "interpretation": "Acute ischaemic stroke (haemorrhage excluded)", "clinical_significance": "Excludes bleed before thrombolysis", "indicated": true }
+    ],
+    "bedside": [
+      { "name": "ECG", "result": "Atrial fibrillation", "interpretation": "AF", "clinical_significance": "Likely cardioembolic source", "indicated": true }
+    ]
+  },
+  "diagnosis": {
+    "final_diagnosis": "Acute ischaemic stroke (likely cardioembolic, left MCA territory)",
+    "differentials": ["Intracerebral haemorrhage", "Hypoglycaemia", "Todd's paresis (post-seizure)", "Bell's palsy"],
+    "explanation": "Sudden focal neurological deficit (right hemiparesis, facial droop, dysarthria) with AF and no anticoagulation, normal glucose and CT excluding haemorrhage, indicates an acute ischaemic (cardioembolic) stroke within the thrombolysis window."
+  },
+  "management": {
+    "emergency_management": [
+      "Protect airway; check glucose to exclude hypoglycaemia",
+      "Urgent non-contrast CT head to exclude haemorrhage",
+      "IV thrombolysis (alteplase) if within window and no contraindication",
+      "Consider mechanical thrombectomy for large-vessel occlusion",
+      "Admit to a stroke unit"
+    ],
+    "definitive_management": ["Antiplatelet (aspirin) after 24h if thrombolysed; anticoagulation later for AF", "Swallow assessment before oral intake"],
+    "follow_up": ["Secondary prevention (anticoagulation for AF, BP, statin, diabetes)", "Stroke rehabilitation"],
+    "patient_education": ["Explain stroke and time-critical treatment", "Secondary prevention importance"]
+  },
+  "rubric": {
+    "history": {
+      "weight": 0.25,
+      "items": [
+        { "id": "hpi_time_onset", "description": "Established exact time of onset / last seen well", "detection_cues": ["when", "time", "onset", "last seen well", "start", "how long ago"], "weight": 2, "required": true, "red_flag": true },
+        { "id": "hpi_deficit", "description": "Characterised the neurological deficit", "detection_cues": ["weakness", "speech", "face", "arm", "leg", "droop"], "weight": 1, "required": true, "red_flag": false },
+        { "id": "hpi_af_anticoag", "description": "Asked about AF / anticoagulation and risk factors", "detection_cues": ["atrial fibrillation", "af", "anticoagul", "warfarin", "blood thinner", "irregular"], "weight": 1, "required": false, "red_flag": false }
+      ]
+    },
+    "physical_exam": {
+      "weight": 0.15,
+      "items": [
+        { "id": "exam_glucose_vitals", "description": "Checked glucose and vitals", "detection_cues": ["glucose", "sugar", "vitals", "blood pressure", "bm"], "weight": 1, "required": true, "red_flag": true },
+        { "id": "exam_neuro", "description": "Performed a neurological examination", "detection_cues": ["neuro", "power", "examine", "nihss", "face arm speech", "reflex"], "weight": 1, "required": true, "red_flag": false }
+      ]
+    },
+    "investigations": {
+      "weight": 0.2,
+      "expected": ["CT Head", "Capillary Blood Glucose", "ECG", "Coagulation Profile"],
+      "not_indicated": ["Thyroid Function Tests"]
+    },
+    "diagnosis": {
+      "weight": 0.2,
+      "accepted": ["Acute ischaemic stroke", "Ischaemic stroke", "Stroke", "Cardioembolic stroke"],
+      "acceptable_differentials": ["Intracerebral haemorrhage", "Hypoglycaemia", "Todd's paresis (post-seizure)", "Bell's palsy"]
+    },
+    "treatment": {
+      "weight": 0.15,
+      "items": [
+        { "id": "tx_ct_then_thrombolysis", "description": "Urgent CT then thrombolysis if eligible", "detection_cues": ["ct", "scan", "thrombolysis", "alteplase", "tpa", "thrombectomy"], "weight": 3, "required": true, "red_flag": true },
+        { "id": "tx_stroke_unit", "description": "Stroke unit / supportive measures", "detection_cues": ["stroke unit", "swallow", "aspirin", "admit"], "weight": 1, "required": false, "red_flag": false }
+      ]
+    },
+    "communication": {
+      "weight": 0.05,
+      "items": [
+        { "id": "comm_explained", "description": "Explained diagnosis and urgency", "detection_cues": ["explain", "tell you", "time", "urgent", "going to"], "weight": 1, "required": false, "red_flag": false }
+      ]
+    }
+  },
+  "teaching_points": {
+    "pearls": ["Time is brain — establish onset time precisely; check glucose first.", "CT excludes haemorrhage before thrombolysis; AF without anticoagulation is a classic embolic source."],
+    "pitfalls": ["Missing hypoglycaemia as a stroke mimic.", "Delaying CT/thrombolysis; giving anticoagulation acutely instead of following the pathway."],
+    "references": ["NICE: Stroke and TIA"],
+    "learning_objectives": ["Recognise acute stroke and the time window.", "Exclude mimics and haemorrhage.", "Initiate reperfusion and stroke-unit care."]
+  }
+}
