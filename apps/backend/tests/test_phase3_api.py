@@ -108,6 +108,28 @@ def test_create_get_and_list_session(client, auth_headers, published_case_id) ->
     assert listing.json()["meta"]["total_items"] == 1
 
 
+def test_delete_session(client, auth_headers, published_case_id) -> None:
+    session_id = _start_session(client, auth_headers, published_case_id)
+    resp = client.delete(f"/api/v1/sessions/{session_id}", headers=auth_headers)
+    assert resp.status_code == 200
+    assert resp.json()["data"]["deleted"] is True
+    # It is gone.
+    assert client.get(f"/api/v1/sessions/{session_id}", headers=auth_headers).status_code == 404
+    assert client.get("/api/v1/sessions", headers=auth_headers).json()["meta"]["total_items"] == 0
+
+
+def test_cannot_delete_another_users_session(client, auth_headers, published_case_id) -> None:
+    session_id = _start_session(client, auth_headers, published_case_id)
+    other = client.post(
+        "/api/v1/auth/register",
+        json={"email": "thief@example.com", "password": "password1234"},
+    ).json()["data"]["access_token"]
+    resp = client.delete(
+        f"/api/v1/sessions/{session_id}", headers={"Authorization": f"Bearer {other}"}
+    )
+    assert resp.status_code == 404
+
+
 def test_session_not_found_for_other_user(client, auth_headers, published_case_id) -> None:
     session_id = _start_session(client, auth_headers, published_case_id)
     # A different user must not see it.

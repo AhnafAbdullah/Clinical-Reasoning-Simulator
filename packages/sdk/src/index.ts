@@ -155,6 +155,8 @@ export const api = {
     ),
   getSession: (id: string) => request<SessionDetail>(`/api/v1/sessions/${id}`),
   listSessions: () => request<SessionDetail[]>("/api/v1/sessions"),
+  deleteSession: (id: string) =>
+    request<{ deleted: boolean }>(`/api/v1/sessions/${id}`, { method: "DELETE" }),
 
   // conversation
   sendMessage: (id: string, message: string) =>

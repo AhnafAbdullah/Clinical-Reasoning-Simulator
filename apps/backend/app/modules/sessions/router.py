@@ -99,6 +99,12 @@ def get_session(session_id: uuid.UUID, db: DbDep, user: CurrentUser) -> dict[str
     return ok(SessionDetail.from_entity(session).model_dump(mode="json"))
 
 
+@router.delete("/{session_id}")
+def delete_session(session_id: uuid.UUID, db: DbDep, user: CurrentUser) -> dict[str, Any]:
+    uc.delete_session(SqlAlchemySessionRepository(db), session_id=session_id, user_id=user.id)
+    return ok({"deleted": True})
+
+
 @router.post("/{session_id}/physical-exam")
 def physical_exam(
     session_id: uuid.UUID, body: PhysicalExamRequest, db: DbDep, user: CurrentUser

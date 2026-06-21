@@ -57,14 +57,28 @@ export default function AnalyticsPage() {
             <section className="card p-5">
               <h2 className="font-display text-lg font-semibold text-navy">Recent scores</h2>
               {analytics.data.score_trend.length ? (
-                <div className="mt-4 flex h-32 items-end gap-1.5" aria-label="Score trend">
+                <div
+                  className="mt-4 flex items-end gap-2 border-b border-line pb-0.5"
+                  style={{ height: 140 }}
+                  aria-label="Recent scores"
+                >
                   {analytics.data.score_trend.map((p, i) => (
-                    <div key={i} title={`${new Date(p.date).toLocaleDateString()}: ${p.score}`}
-                      className="flex-1 rounded-t bg-navy/85 transition-all hover:bg-navy"
-                      style={{ height: `${Math.max(4, p.score)}%` }} />
+                    <div
+                      key={i}
+                      className="flex flex-1 flex-col items-center justify-end gap-1"
+                      title={`${new Date(p.date).toLocaleDateString()}: ${p.score}`}
+                    >
+                      <span className="text-[10px] font-semibold text-ink-soft">{p.score}</span>
+                      <div
+                        className="w-full max-w-[28px] rounded-t bg-navy transition-colors hover:bg-navy-700"
+                        style={{ height: Math.max(6, Math.round((p.score / 100) * 104)) }}
+                      />
+                    </div>
                   ))}
                 </div>
-              ) : <Empty />}
+              ) : (
+                <Empty />
+              )}
             </section>
           </div>
         ) : (

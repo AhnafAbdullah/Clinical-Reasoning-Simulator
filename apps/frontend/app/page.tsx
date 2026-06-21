@@ -23,6 +23,7 @@ export default function Dashboard() {
   const router = useRouter();
   const [difficulty, setDifficulty] = useState<string>("");
   const [starting, setStarting] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState<string | null>(null);
 
   useEffect(() => {
     if (!loading && !user) router.replace("/login");
@@ -43,6 +44,17 @@ export default function Dashboard() {
       router.push(`/sessions/${s.session_id}?opening=${s.opening_message_id}`);
     } finally {
       setStarting(null);
+    }
+  }
+
+  async function remove(sessionId: string) {
+    if (!confirm("Delete this session and its report? This cannot be undone.")) return;
+    setDeleting(sessionId);
+    try {
+      await api.deleteSession(sessionId);
+      await Promise.all([sessions.refetch(), analytics.refetch()]);
+    } finally {
+      setDeleting(null);
     }
   }
 
@@ -83,16 +95,31 @@ export default function Dashboard() {
               <Skeleton className="h-14" />
             ) : sessions.data?.length ? (
               sessions.data.map((s) => (
-                <button
+                <div
                   key={s.session_id}
-                  onClick={() => router.push(`/sessions/${s.session_id}`)}
-                  className="card flex w-full items-center justify-between px-4 py-3 text-left transition-shadow hover:shadow-lift"
+                  className="card flex items-center justify-between gap-3 px-4 py-3 transition-shadow hover:shadow-lift"
                 >
-                  <span className="text-sm text-ink">
-                    Session <span className="font-mono text-ink-soft">{s.session_id.slice(0, 8)}</span> · {s.difficulty}
-                  </span>
-                  <span className="chip-navy">{s.status} · {s.current_stage}</span>
-                </button>
+                  <button
+                    onClick={() => router.push(`/sessions/${s.session_id}`)}
+                    className="flex flex-1 items-center justify-between gap-3 text-left"
+                  >
+                    <span className="text-sm text-ink">
+                      Session <span className="font-mono text-ink-soft">{s.session_id.slice(0, 8)}</span> · {s.difficulty}
+                    </span>
+                    <span className="chip-navy">{s.status} · {s.current_stage}</span>
+                  </button>
+                  <button
+                    onClick={() => remove(s.session_id)}
+                    disabled={deleting === s.session_id}
+                    aria-label="Delete session"
+                    title="Delete session"
+                    className="rounded-lg border border-line p-1.5 text-ink-soft transition-colors hover:border-rose-300 hover:bg-rose-50 hover:text-rose-600 disabled:opacity-50"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                      <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 5v6m4-6v6" />
+                    </svg>
+                  </button>
+                </div>
               ))
             ) : (
               <p className="text-sm text-ink-soft">No sessions yet — start a case below.</p>

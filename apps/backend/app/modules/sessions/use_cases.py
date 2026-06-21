@@ -47,6 +47,15 @@ def load_owned_session(
     return session
 
 
+def delete_session(
+    sessions: SessionRepository, *, session_id: uuid.UUID, user_id: uuid.UUID
+) -> None:
+    """Delete a session the caller owns, cascading its conversation, orders,
+    submissions and evaluation. Non-owned/absent sessions report NOT_FOUND."""
+    load_owned_session(sessions, session_id=session_id, user_id=user_id)
+    sessions.delete(session_id)
+
+
 def case_json_for_session(cases: CaseRepository, session: ClinicalSession) -> dict:
     case = cases.get(session.case_id)
     if case is None:

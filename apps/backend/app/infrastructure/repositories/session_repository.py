@@ -60,6 +60,14 @@ class SqlAlchemySessionRepository:
         self._s.flush()
         return _to_domain(row)
 
+    def delete(self, session_id: uuid.UUID) -> None:
+        row = self._s.get(m.ClinicalSession, session_id)
+        if row is not None:
+            # ORM cascade handles conversation; DB ON DELETE CASCADE handles the
+            # other child rows (investigations, submissions, evaluation, exams).
+            self._s.delete(row)
+            self._s.flush()
+
     def list_for_user(
         self, user_id: uuid.UUID, *, limit: int = 50, offset: int = 0
     ) -> list[ClinicalSession]:
