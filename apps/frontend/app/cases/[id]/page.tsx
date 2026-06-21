@@ -4,9 +4,11 @@ import { useQuery } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { NavBar, Skeleton, Spinner } from "@/app/components/ui";
+import { GoldStrip, NavBar, Skeleton, Spinner } from "@/app/components/ui";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
+
+const STAGES = ["History", "Examination", "Investigations", "Differential", "Diagnosis", "Management"];
 
 export default function CaseDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -18,11 +20,7 @@ export default function CaseDetailPage() {
     if (!loading && !user) router.replace("/login");
   }, [loading, user, router]);
 
-  const detail = useQuery({
-    queryKey: ["case", id],
-    queryFn: () => api.getCase(id),
-    enabled: !!user,
-  });
+  const detail = useQuery({ queryKey: ["case", id], queryFn: () => api.getCase(id), enabled: !!user });
 
   async function start() {
     setStarting(true);
@@ -41,41 +39,38 @@ export default function CaseDetailPage() {
       <NavBar />
       <main className="mx-auto max-w-2xl px-6 py-10">
         {detail.isLoading ? (
-          <Skeleton className="h-40" />
+          <Skeleton className="h-56" />
         ) : detail.data ? (
-          <>
+          <div className="card-gold animate-fade-up p-7">
             <div className="flex items-center gap-2">
-              <span className="rounded-full bg-blue-50 px-2 py-0.5 text-xs text-blue-700">
-                {detail.data.difficulty}
-              </span>
-              <span className="text-xs text-neutral-500">
-                {detail.data.specialty} · {detail.data.estimated_duration} min
-              </span>
+              <span className="chip-gold">{detail.data.difficulty}</span>
+              <span className="text-xs text-ink-soft">{detail.data.specialty} · {detail.data.estimated_duration} min</span>
             </div>
-            <h1 className="mt-3 text-2xl font-semibold">{detail.data.title}</h1>
-            <p className="mt-2 text-sm text-neutral-600">
-              You will take a history from the simulated patient, examine them, order
-              investigations, then commit to a ranked differential, a final diagnosis and a
-              management plan. A consultant report is generated at the end.
+            <GoldStrip className="mt-4" />
+            <h1 className="mt-3 font-display text-3xl font-semibold leading-tight text-navy">{detail.data.title}</h1>
+            <p className="mt-3 text-ink-soft">
+              You will take a history from a live simulated patient, examine them, order investigations,
+              then commit to a ranked differential, a final diagnosis and a management plan. A
+              rubric-anchored consultant report is generated at the end.
             </p>
-            <div className="mt-6 flex gap-3">
-              <button
-                onClick={start}
-                disabled={starting}
-                className="rounded-md bg-neutral-900 px-4 py-2 text-sm text-white disabled:opacity-50"
-              >
-                {starting ? "Starting…" : "Start case"}
-              </button>
-              <button
-                onClick={() => router.push("/")}
-                className="rounded-md border border-neutral-300 px-4 py-2 text-sm"
-              >
-                Back
-              </button>
+
+            <div className="mt-5 flex flex-wrap gap-2">
+              {STAGES.map((s, i) => (
+                <span key={s} className="chip">
+                  <span className="font-semibold text-navy">{i + 1}</span> {s}
+                </span>
+              ))}
             </div>
-          </>
+
+            <div className="mt-7 flex gap-3">
+              <button onClick={start} disabled={starting} className="btn-gold px-6">
+                {starting ? "Starting…" : "Start case →"}
+              </button>
+              <button onClick={() => router.push("/")} className="btn-ghost">Back</button>
+            </div>
+          </div>
         ) : (
-          <p className="text-sm text-neutral-500">Case not found.</p>
+          <p className="text-sm text-ink-soft">Case not found.</p>
         )}
       </main>
     </>

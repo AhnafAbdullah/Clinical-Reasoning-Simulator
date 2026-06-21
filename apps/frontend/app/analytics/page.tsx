@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
-import { NavBar, ScoreBar, Skeleton, Spinner } from "@/app/components/ui";
+import { GoldStrip, NavBar, ScoreBar, Skeleton, Spinner } from "@/app/components/ui";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 
@@ -16,11 +16,7 @@ export default function AnalyticsPage() {
     if (!loading && !user) router.replace("/login");
   }, [loading, user, router]);
 
-  const analytics = useQuery({
-    queryKey: ["analytics"],
-    queryFn: () => api.analytics(),
-    enabled: !!user,
-  });
+  const analytics = useQuery({ queryKey: ["analytics"], queryFn: () => api.analytics(), enabled: !!user });
 
   if (loading || !user) return <Spinner />;
 
@@ -28,62 +24,51 @@ export default function AnalyticsPage() {
     <>
       <NavBar />
       <main className="mx-auto max-w-4xl px-6 py-8">
-        <h1 className="text-2xl font-semibold">Your performance</h1>
+        <header className="animate-fade-up">
+          <GoldStrip className="mb-3" />
+          <h1 className="font-display text-3xl font-semibold text-navy">Your performance</h1>
+          <p className="mt-1 text-ink-soft">Track how your clinical reasoning is improving.</p>
+        </header>
 
         {analytics.isLoading ? (
           <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <Skeleton key={i} className="h-20" />
-            ))}
+            {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-24" />)}
           </div>
         ) : analytics.data ? (
           <div className="mt-6 space-y-8">
             <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               <Stat label="Cases completed" value={analytics.data.cases_completed} />
               <Stat label="Average score" value={analytics.data.average_score} />
-              <Stat
-                label="Tests ordered"
-                value={analytics.data.investigation_usage.total_ordered}
-              />
-              <Stat
-                label="Informative %"
-                value={analytics.data.investigation_usage.informative_pct}
-              />
+              <Stat label="Tests ordered" value={analytics.data.investigation_usage.total_ordered} />
+              <Stat label="Useful tests %" value={analytics.data.investigation_usage.informative_pct} />
             </section>
 
-            <section>
-              <h2 className="text-lg font-medium">By difficulty</h2>
+            <section className="card p-5">
+              <h2 className="font-display text-lg font-semibold text-navy">By difficulty</h2>
               {Object.keys(analytics.data.by_difficulty).length ? (
                 <div className="mt-3 space-y-3">
                   {Object.entries(analytics.data.by_difficulty).map(([d, s]) => (
                     <ScoreBar key={d} label={`${d} (${s.count})`} value={s.average_score} />
                   ))}
                 </div>
-              ) : (
-                <Empty />
-              )}
+              ) : <Empty />}
             </section>
 
-            <section>
-              <h2 className="text-lg font-medium">Recent scores</h2>
+            <section className="card p-5">
+              <h2 className="font-display text-lg font-semibold text-navy">Recent scores</h2>
               {analytics.data.score_trend.length ? (
-                <div className="mt-3 flex h-32 items-end gap-1" aria-label="Score trend">
+                <div className="mt-4 flex h-32 items-end gap-1.5" aria-label="Score trend">
                   {analytics.data.score_trend.map((p, i) => (
-                    <div
-                      key={i}
-                      title={`${new Date(p.date).toLocaleDateString()}: ${p.score}`}
-                      className="flex-1 rounded-t bg-blue-500/70"
-                      style={{ height: `${Math.max(4, p.score)}%` }}
-                    />
+                    <div key={i} title={`${new Date(p.date).toLocaleDateString()}: ${p.score}`}
+                      className="flex-1 rounded-t bg-navy/85 transition-all hover:bg-navy"
+                      style={{ height: `${Math.max(4, p.score)}%` }} />
                   ))}
                 </div>
-              ) : (
-                <Empty />
-              )}
+              ) : <Empty />}
             </section>
           </div>
         ) : (
-          <p className="mt-6 text-sm text-neutral-500">Could not load analytics.</p>
+          <p className="mt-6 text-sm text-ink-soft">Could not load analytics.</p>
         )}
       </main>
     </>
@@ -92,13 +77,13 @@ export default function AnalyticsPage() {
 
 function Stat({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-lg border border-neutral-200 p-4">
-      <div className="text-2xl font-semibold">{value}</div>
-      <div className="text-xs text-neutral-500">{label}</div>
+    <div className="card-gold p-4">
+      <div className="font-display text-3xl font-semibold text-navy">{value}</div>
+      <div className="text-xs uppercase tracking-wide text-ink-soft">{label}</div>
     </div>
   );
 }
 
 function Empty() {
-  return <p className="mt-2 text-sm text-neutral-400">Complete a case to see this.</p>;
+  return <p className="mt-2 text-sm text-ink-soft">Complete a case to see this.</p>;
 }
