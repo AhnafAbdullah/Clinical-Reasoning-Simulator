@@ -105,6 +105,15 @@ def delete_session(session_id: uuid.UUID, db: DbDep, user: CurrentUser) -> dict[
     return ok({"deleted": True})
 
 
+@router.get("/{session_id}/patient")
+def patient_presentation(session_id: uuid.UUID, db: DbDep, user: CurrentUser) -> dict[str, Any]:
+    session = uc.load_owned_session(
+        SqlAlchemySessionRepository(db), session_id=session_id, user_id=user.id
+    )
+    case_json = uc.case_json_for_session(SqlAlchemyCaseRepository(db), session)
+    return ok(uc.patient_presentation(case_json))
+
+
 @router.post("/{session_id}/physical-exam")
 def physical_exam(
     session_id: uuid.UUID, body: PhysicalExamRequest, db: DbDep, user: CurrentUser

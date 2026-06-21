@@ -7,6 +7,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { ClinicScene, PatientFigure } from "@/app/components/clinic";
 import { CommitPanel, ExamPanel, TestsPanel } from "@/app/components/workspace";
+import { useAmbience } from "@/lib/ambience";
 import { api, ApiError, streamPatientTurn, type MessageItem } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 
@@ -29,6 +30,12 @@ export default function DailyPage() {
   const [streak, setStreak] = useState(0);
   const [starting, setStarting] = useState(false);
   const openingRef = useRef<string | null>(null);
+
+  const patient = useQuery({
+    queryKey: ["patient", sessionId],
+    queryFn: () => api.getPatient(sessionId as string),
+    enabled: !!sessionId,
+  });
 
   async function begin() {
     if (starting) return;
@@ -90,7 +97,18 @@ export default function DailyPage() {
             transition={{ duration: reduce ? 0 : 0.9, delay: reduce ? 0 : 0.5, ease: "easeOut" }}
             className="pointer-events-none absolute bottom-0 left-2 z-10 w-[clamp(160px,22vw,300px)] sm:left-10"
           >
-            <PatientFigure className="h-auto w-full drop-shadow-2xl" />
+            <motion.div
+              animate={reduce ? undefined : { y: [0, -3, 0], scale: [1, 1.012, 1] }}
+              transition={reduce ? undefined : { duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
+              style={{ transformOrigin: "bottom center" }}
+            >
+              <PatientFigure
+                gender={patient.data?.gender}
+                age={patient.data?.age ?? null}
+                affect={patient.data?.affect}
+                className="h-auto w-full drop-shadow-2xl"
+              />
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -198,6 +216,7 @@ function Consult({
   const [busy, setBusy] = useState(false);
   const [drawer, setDrawer] = useState(false);
   const [tab, setTab] = useState<Tab>("exam");
+  const ambience = useAmbience();
 
   const stage = session.data?.current_stage ?? "GREETING";
   const sstatus = session.data?.status ?? "ACTIVE";
@@ -246,15 +265,24 @@ function Consult({
         <button onClick={onExit} className="text-sm text-cream-card/80 hover:text-cream-card">← Leave</button>
         <div className="flex items-center gap-3">
           {streak > 0 && <span className="rounded-full border border-gold/40 bg-navy/40 px-3 py-1 text-sm text-gold-soft backdrop-blur">🔥 {streak}</span>}
+          <button
+            onClick={ambience.toggle}
+            aria-pressed={ambience.on}
+            title={ambience.on ? "Mute clinic ambience" : "Play clinic ambience"}
+            className="rounded-full border border-cream-card/20 bg-navy/40 px-2.5 py-1 text-sm text-cream-card/80 backdrop-blur transition-colors hover:text-cream-card"
+          >
+            {ambience.on ? "🔊" : "🔈"}
+          </button>
           <span className="rounded-full bg-navy/50 px-3 py-1 text-xs text-cream-card/80 backdrop-blur">{sstatus} · {stage}</span>
           <button onClick={() => setDrawer(true)} className="btn-gold px-4 py-1.5 text-sm">Workspace</button>
         </div>
       </div>
 
-      {/* Conversation transcript — speech boxes stack above the latest; older
-          ones fade at the top edge but become crisp as you scroll to them. */}
-      <div className="pointer-events-none flex flex-1 items-end">
-        <div className="pointer-events-auto mb-3 w-full px-3 sm:ml-[clamp(170px,22vw,340px)] sm:w-auto">
+      {/* Conversation transcript — fills the page height; speech boxes stack
+          above the latest, older ones fade at the top edge but become crisp as
+          you scroll to them. */}
+      <div className="pointer-events-none flex min-h-0 flex-1">
+        <div className="pointer-events-auto flex min-h-0 w-full px-3 sm:ml-[clamp(160px,20vw,320px)] sm:w-[clamp(320px,44vw,560px)]">
           <Transcript messages={messages.data ?? []} live={live} />
         </div>
       </div>
@@ -324,21 +352,25 @@ function Transcript({ messages, live }: { messages: MessageItem[]; live: string 
   return (
     <div
       ref={ref}
-      className="w-full space-y-3 overflow-y-auto pr-1 sm:w-[clamp(300px,40vw,520px)]"
-      style={{ maxHeight: "clamp(230px, 42vh, 440px)", maskImage: fade, WebkitMaskImage: fade }}
+      className="h-full w-full overflow-y-auto pr-1"
+      style={{ maskImage: fade, WebkitMaskImage: fade }}
     >
-      {empty ? (
-        <div className="rounded-2xl border border-line bg-cream-card/90 px-4 py-3 text-sm text-ink-soft backdrop-blur">
-          The patient settles in…
-        </div>
-      ) : (
-        <>
-          {messages.map((m) => (
-            <ChatTurn key={m.id} role={m.role} text={m.message} />
-          ))}
-          {live !== null && <ChatTurn role="patient" text={live || "…"} typing={!live} latest />}
-        </>
-      )}
+      {/* min-h-full + justify-end keeps a short conversation anchored near the
+          patient at the bottom, while a long one scrolls and fades at the top. */}
+      <div className="flex min-h-full flex-col justify-end space-y-3 py-3">
+        {empty ? (
+          <div className="rounded-2xl border border-line bg-cream-card/90 px-4 py-3 text-sm text-ink-soft backdrop-blur">
+            The patient settles in…
+          </div>
+        ) : (
+          <>
+            {messages.map((m) => (
+              <ChatTurn key={m.id} role={m.role} text={m.message} />
+            ))}
+            {live !== null && <ChatTurn role="patient" text={live || "…"} typing={!live} latest />}
+          </>
+        )}
+      </div>
     </div>
   );
 }

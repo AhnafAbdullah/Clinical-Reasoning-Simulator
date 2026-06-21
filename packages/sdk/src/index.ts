@@ -100,6 +100,12 @@ export interface MessageItem {
   message: string;
   timestamp: string;
 }
+export interface PatientPresentation {
+  name: string;
+  age: number | null;
+  gender: string;
+  affect: string;
+}
 export interface InvestigationResult {
   status: string;
   outcome: string;
@@ -170,6 +176,7 @@ export const api = {
       { method: "POST", body: JSON.stringify({ case_id }) },
     ),
   getSession: (id: string) => request<SessionDetail>(`/api/v1/sessions/${id}`),
+  getPatient: (id: string) => request<PatientPresentation>(`/api/v1/sessions/${id}/patient`),
   listSessions: () => request<SessionDetail[]>("/api/v1/sessions"),
   deleteSession: (id: string) =>
     request<{ deleted: boolean }>(`/api/v1/sessions/${id}`, { method: "DELETE" }),

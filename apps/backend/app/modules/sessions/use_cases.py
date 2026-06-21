@@ -68,6 +68,38 @@ def require_admin_or_owner(session: ClinicalSession, *, user_id: uuid.UUID, is_a
         raise PermissionDeniedError("You do not have access to this session.")
 
 
+_AFFECT_CUES: list[tuple[str, tuple[str, ...]]] = [
+    ("in_pain", ("pain", "agony", "clutch", "writh", "grimac", "distress", "doubled over")),
+    ("drowsy", ("drowsy", "confus", "lethargic", "sleepy", "obtunded", "groggy")),
+    ("anxious", ("anxious", "worried", "frighten", "nervous", "panic", "scared", "fearful")),
+    ("stoic", ("stoic", "plays down", "downplay", "matter-of-fact", "brief answers")),
+    ("breathless", ("breathless", "short of breath", "gasping", "wheez", "pursed-lip")),
+]
+
+
+def _derive_affect(personality: str, communication: str) -> str:
+    """A coarse, presentation-only mood for the avatar — never clinical truth."""
+    blob = f"{personality} {communication}".lower()
+    for affect, cues in _AFFECT_CUES:
+        if any(c in blob for c in cues):
+            return affect
+    return "calm"
+
+
+def patient_presentation(case_json: dict) -> dict:
+    """Non-clinical presentation info for the avatar (name/age/gender + affect).
+    The patient says these things anyway, so they are not a diagnostic spoiler."""
+    p = case_json.get("patient", {}) or {}
+    return {
+        "name": p.get("name", "the patient"),
+        "age": p.get("age"),
+        "gender": (p.get("gender") or "").lower(),
+        "affect": _derive_affect(
+            str(p.get("personality", "")), str(p.get("communication_style", ""))
+        ),
+    }
+
+
 def physical_exam_findings(case_json: dict, system: str) -> dict:
     """Return the structured findings for a body system straight from the case
     JSON — no AI invents findings (Vol 4D §8). Unknown systems raise NOT_FOUND."""

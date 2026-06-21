@@ -104,8 +104,39 @@ export function ClinicScene({ className = "" }: { className?: string }) {
   );
 }
 
-/** A calm, neutral seated patient. Phase B will vary affect/age/gender. */
-export function PatientFigure({ className = "" }: { className?: string }) {
+/**
+ * A seated patient that varies by gender, age bracket and affect (Phase B).
+ * Still a single parameterised SVG — no binary assets.
+ */
+export function PatientFigure({
+  gender = "",
+  age = null,
+  affect = "calm",
+  className = "",
+}: {
+  gender?: string;
+  age?: number | null;
+  affect?: string;
+  className?: string;
+}) {
+  const female = gender.toLowerCase().startsWith("f");
+  const bracket = age == null ? "adult" : age < 16 ? "child" : age >= 65 ? "elderly" : "adult";
+  const hair = bracket === "elderly" ? "#c9c6bd" : female ? "#3a2a1e" : "#2a2118";
+  const worried = affect === "anxious" || affect === "in_pain";
+  const sweaty = affect === "in_pain" || affect === "breathless";
+  const drowsy = affect === "drowsy";
+
+  const mouth =
+    affect === "in_pain"
+      ? <ellipse cx="140" cy="176" rx="9" ry="7" fill="#7a3b32" />
+      : affect === "breathless"
+        ? <ellipse cx="140" cy="175" rx="6" ry="6" fill="#7a3b32" />
+        : affect === "anxious"
+          ? <path d="M127 177 Q140 169 153 177" stroke="#9c6b3f" strokeWidth="3" fill="none" strokeLinecap="round" />
+          : affect === "drowsy" || affect === "stoic"
+            ? <path d="M127 175 L153 175" stroke="#9c6b3f" strokeWidth="3" strokeLinecap="round" />
+            : <path d="M128 172 Q140 180 152 172" stroke="#9c6b3f" strokeWidth="3" fill="none" strokeLinecap="round" />;
+
   return (
     <svg className={className} viewBox="0 0 280 360" xmlns="http://www.w3.org/2000/svg" aria-hidden>
       <defs>
@@ -115,16 +146,63 @@ export function PatientFigure({ className = "" }: { className?: string }) {
         </linearGradient>
       </defs>
       <ellipse cx="140" cy="348" rx="92" ry="14" fill="#000" opacity="0.18" />
-      {/* body */}
-      <path d="M52 360 C52 250 86 214 140 214 C194 214 228 250 228 360 Z" fill="url(#coat)" />
-      <path d="M140 214 L140 360" stroke="#c2a14a" strokeWidth="3" opacity="0.6" />
-      {/* neck + head */}
-      <rect x="124" y="176" width="32" height="40" rx="14" fill="#e3b58e" />
-      <circle cx="140" cy="150" r="46" fill="#edc39a" />
-      <path d="M96 146 C96 96 184 96 184 146 C184 120 96 120 96 146 Z" fill="#2a2118" />
-      <circle cx="124" cy="150" r="5" fill="#1e2a44" />
-      <circle cx="156" cy="150" r="5" fill="#1e2a44" />
-      <path d="M128 172 Q140 180 152 172" stroke="#9c6b3f" strokeWidth="3" fill="none" strokeLinecap="round" />
+
+      <g transform={bracket === "child" ? "translate(140 360) scale(0.84) translate(-140 -360)" : undefined}>
+        {/* body */}
+        <path d="M52 360 C52 250 86 214 140 214 C194 214 228 250 228 360 Z" fill="url(#coat)" />
+        <path d="M140 214 L140 360" stroke="#c2a14a" strokeWidth="3" opacity="0.6" />
+
+        {/* neck + head (elderly leans slightly forward) */}
+        <g transform={bracket === "elderly" ? "translate(6 4)" : undefined}>
+          <rect x="124" y="176" width="32" height="40" rx="14" fill="#e3b58e" />
+          {/* female: longer hair framing the face */}
+          {female && <path d="M92 150 C88 210 100 240 116 244 L116 150 Z" fill={hair} />}
+          {female && <path d="M188 150 C192 210 180 240 164 244 L164 150 Z" fill={hair} />}
+          <circle cx="140" cy="150" r="46" fill={sweaty ? "#e9c8a3" : "#edc39a"} />
+          {/* hair cap */}
+          <path d="M96 146 C96 96 184 96 184 146 C184 120 96 120 96 146 Z" fill={hair} />
+
+          {/* brows */}
+          {worried ? (
+            <>
+              <path d="M116 138 L132 134" stroke="#7a5a3a" strokeWidth="3" strokeLinecap="round" />
+              <path d="M164 138 L148 134" stroke="#7a5a3a" strokeWidth="3" strokeLinecap="round" />
+            </>
+          ) : (
+            <>
+              <path d="M118 136 L132 136" stroke="#7a5a3a" strokeWidth="3" strokeLinecap="round" />
+              <path d="M148 136 L162 136" stroke="#7a5a3a" strokeWidth="3" strokeLinecap="round" />
+            </>
+          )}
+
+          {/* eyes (drowsy = half-closed) */}
+          {drowsy ? (
+            <>
+              <path d="M118 150 Q124 154 130 150" stroke="#1e2a44" strokeWidth="3" fill="none" strokeLinecap="round" />
+              <path d="M150 150 Q156 154 162 150" stroke="#1e2a44" strokeWidth="3" fill="none" strokeLinecap="round" />
+            </>
+          ) : (
+            <>
+              <circle cx="124" cy="150" r="5" fill="#1e2a44" />
+              <circle cx="156" cy="150" r="5" fill="#1e2a44" />
+            </>
+          )}
+
+          {/* elderly glasses */}
+          {bracket === "elderly" && (
+            <g stroke="#56607a" strokeWidth="2.5" fill="none">
+              <circle cx="124" cy="150" r="11" />
+              <circle cx="156" cy="150" r="11" />
+              <path d="M135 150 L145 150" />
+            </g>
+          )}
+
+          {mouth}
+
+          {/* sweat for pain/breathlessness */}
+          {sweaty && <path d="M182 132 q-5 9 0 13 q5 -4 0 -13" fill="#bfddf1" opacity="0.9" />}
+        </g>
+      </g>
     </svg>
   );
 }
