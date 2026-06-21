@@ -5,7 +5,7 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { ClinicScene, Mindbox, PatientFigure } from "@/app/components/clinic";
+import { ClinicScene, PatientFigure } from "@/app/components/clinic";
 import { CommitPanel, ExamPanel, TestsPanel } from "@/app/components/workspace";
 import { api, ApiError, streamPatientTurn, type MessageItem } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
@@ -198,7 +198,6 @@ function Consult({
   const [busy, setBusy] = useState(false);
   const [drawer, setDrawer] = useState(false);
   const [tab, setTab] = useState<Tab>("exam");
-  const [lastAsked, setLastAsked] = useState<string | null>(null);
 
   const stage = session.data?.current_stage ?? "GREETING";
   const sstatus = session.data?.status ?? "ACTIVE";
@@ -230,7 +229,6 @@ function Consult({
     if (!text || busy) return;
     setBusy(true);
     setDraft("");
-    setLastAsked(text);
     try {
       const { message_id } = await api.sendMessage(sessionId, text);
       await messages.refetch();
@@ -240,10 +238,6 @@ function Consult({
       session.refetch();
     }
   }
-
-  const patientTurns = (messages.data ?? []).filter((m: MessageItem) => m.role === "patient");
-  const mindbox = live ?? patientTurns[patientTurns.length - 1]?.message ?? "";
-  const typing = live !== null;
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="absolute inset-0 z-20 flex flex-col">
@@ -257,20 +251,16 @@ function Consult({
         </div>
       </div>
 
-      {/* Mindbox anchored near the patient */}
+      {/* Conversation transcript — speech boxes stack above the latest; older
+          ones fade at the top edge but become crisp as you scroll to them. */}
       <div className="pointer-events-none flex flex-1 items-end">
-        <div className="mb-[clamp(120px,20vw,260px)] ml-4 sm:ml-[clamp(190px,24vw,360px)]">
-          {mindbox ? <Mindbox text={mindbox} typing={typing} /> : (
-            <div className="rounded-2xl border border-line bg-cream-card/90 px-4 py-3 text-sm text-ink-soft backdrop-blur">
-              The patient settles in…
-            </div>
-          )}
+        <div className="pointer-events-auto mb-3 w-full px-3 sm:ml-[clamp(170px,22vw,340px)] sm:w-auto">
+          <Transcript messages={messages.data ?? []} live={live} />
         </div>
       </div>
 
       {/* Doctor input (your POV) */}
       <div className="px-4 pb-5">
-        {lastAsked && <p className="mx-auto mb-2 max-w-2xl text-center text-xs text-cream-card/55">You asked: “{lastAsked}”</p>}
         <div className="mx-auto flex max-w-2xl gap-2">
           <input
             className="flex-1 rounded-full border border-cream-card/20 bg-navy/50 px-5 py-3 text-cream-card placeholder:text-cream-card/40 backdrop-blur focus:border-gold focus:outline-none"
@@ -316,6 +306,81 @@ function Consult({
           </>
         )}
       </AnimatePresence>
+    </motion.div>
+  );
+}
+
+function Transcript({ messages, live }: { messages: MessageItem[]; live: string | null }) {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    ref.current?.scrollTo({ top: ref.current.scrollHeight, behavior: "smooth" });
+  }, [messages, live]);
+
+  const empty = messages.length === 0 && live === null;
+  // Top-edge fade: ~3-4 turns sit crisp in view; older turns fade as they reach
+  // the top, and become fully legible again when scrolled into the clear zone.
+  const fade = "linear-gradient(to bottom, transparent 0, #000 16%, #000 100%)";
+
+  return (
+    <div
+      ref={ref}
+      className="w-full space-y-3 overflow-y-auto pr-1 sm:w-[clamp(300px,40vw,520px)]"
+      style={{ maxHeight: "clamp(230px, 42vh, 440px)", maskImage: fade, WebkitMaskImage: fade }}
+    >
+      {empty ? (
+        <div className="rounded-2xl border border-line bg-cream-card/90 px-4 py-3 text-sm text-ink-soft backdrop-blur">
+          The patient settles in…
+        </div>
+      ) : (
+        <>
+          {messages.map((m) => (
+            <ChatTurn key={m.id} role={m.role} text={m.message} />
+          ))}
+          {live !== null && <ChatTurn role="patient" text={live || "…"} typing={!live} latest />}
+        </>
+      )}
+    </div>
+  );
+}
+
+function ChatTurn({
+  role,
+  text,
+  typing,
+  latest,
+}: {
+  role: string;
+  text: string;
+  typing?: boolean;
+  latest?: boolean;
+}) {
+  const isDoctor = role === "student";
+  return (
+    <motion.div
+      initial={latest ? { opacity: 0, y: 10 } : false}
+      animate={{ opacity: 1, y: 0 }}
+      className={`flex ${isDoctor ? "justify-end" : "justify-start"}`}
+    >
+      <div className="max-w-[88%]">
+        <div
+          className={`mb-0.5 text-[10px] uppercase tracking-wide ${
+            isDoctor ? "text-right text-sky-200" : "text-gold-soft"
+          }`}
+        >
+          {isDoctor ? "You" : "Patient"}
+        </div>
+        <div
+          className={`rounded-2xl px-3.5 py-2 text-sm leading-relaxed shadow-lift ${
+            isDoctor
+              ? "rounded-tr-sm bg-sky text-navy"
+              : "rounded-tl-sm border border-line bg-cream-card/95 text-navy backdrop-blur"
+          }`}
+        >
+          {!isDoctor && <span className="gold-strip mb-1.5 block w-7" />}
+          {text}
+          {typing && <span className="ml-0.5 inline-block h-4 w-[2px] animate-pulse bg-navy align-middle" />}
+        </div>
+      </div>
     </motion.div>
   );
 }
