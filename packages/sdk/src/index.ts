@@ -122,6 +122,22 @@ export interface Analytics {
   score_trend: { date: string; score: number }[];
   investigation_usage: { total_ordered: number; informative: number; informative_pct: number };
 }
+export interface DailyStatus {
+  date: string;
+  difficulty: string;
+  specialty: string;
+  estimated_duration: number;
+  attempted: boolean;
+  session_id: string | null;
+  streak: number;
+}
+export interface DailyStart {
+  session_id: string;
+  status: string;
+  opening_message_id: string | null;
+  resumed: boolean;
+  streak: number;
+}
 
 // ── Endpoints ──────────────────────────────────────────────────────────────────
 export const api = {
@@ -203,6 +219,10 @@ export const api = {
 
   // analytics
   analytics: () => request<Analytics>("/api/v1/users/me/analytics"),
+
+  // daily challenge
+  dailyStatus: () => request<DailyStatus>("/api/v1/daily"),
+  startDaily: () => request<DailyStart>("/api/v1/daily/start", { method: "POST" }),
 };
 
 // ── Authenticated SSE (EventSource can't send headers) ───────────────────────────

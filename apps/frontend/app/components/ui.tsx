@@ -79,6 +79,7 @@ export function NavBar() {
           <Brand />
           <div className="hidden items-center gap-1 sm:flex">
             {link("/", "Dashboard")}
+            {link("/daily", "Daily Challenge")}
             {link("/analytics", "Analytics")}
           </div>
         </div>

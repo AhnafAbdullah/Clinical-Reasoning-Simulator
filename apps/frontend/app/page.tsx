@@ -74,6 +74,28 @@ export default function Dashboard() {
           <p className="mt-1 text-ink-soft">Pick a case and step into the consultation room.</p>
         </header>
 
+        {/* Daily Challenge hero */}
+        <Link
+          href="/daily"
+          className="group relative mt-6 block overflow-hidden rounded-xl2 bg-navy p-6 text-cream-card shadow-card transition-shadow hover:shadow-lift"
+        >
+          <div className="pointer-events-none absolute inset-0 opacity-25" aria-hidden
+            style={{ backgroundImage: "radial-gradient(420px 200px at 88% 20%, #c2a14a, transparent 60%), radial-gradient(360px 220px at 10% 120%, #2f6ea5, transparent 60%)" }} />
+          <div className="relative flex items-center justify-between gap-4">
+            <div>
+              <span className="gold-strip mb-3 w-12" />
+              <h2 className="font-display text-2xl font-semibold">The Daily Challenge</h2>
+              <p className="mt-1 max-w-md text-sm text-cream-card/75">
+                A patient walks in. One case, one shot — take the history and reason it out. Build your streak.
+              </p>
+            </div>
+            <span className="hidden shrink-0 rounded-full px-5 py-2.5 font-semibold text-navy transition-transform group-hover:-translate-y-0.5 sm:inline-block"
+              style={{ background: "linear-gradient(180deg,#dec987,#c2a14a)" }}>
+              Enter the room →
+            </span>
+          </div>
+        </Link>
+
         <Link href="/analytics" className="card-gold mt-6 block p-5 transition-shadow hover:shadow-lift">
           {analytics.isLoading ? (
             <Skeleton className="h-8 w-72" />

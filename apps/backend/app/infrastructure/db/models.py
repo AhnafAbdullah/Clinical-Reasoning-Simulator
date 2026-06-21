@@ -9,14 +9,18 @@ from __future__ import annotations
 import uuid
 from datetime import datetime
 
+from datetime import date as _date
+
 from sqlalchemy import (
     Boolean,
+    Date,
     DateTime,
     Enum as SAEnum,
     ForeignKey,
     Integer,
     String,
     Text,
+    UniqueConstraint,
     func,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -253,3 +257,22 @@ class AuditLog(Base):
     resource_id: Mapped[str | None] = mapped_column(String(64))
     audit_metadata: Mapped[dict | None] = mapped_column("metadata", JSONType)
     timestamp: Mapped[datetime] = mapped_column(_TS, server_default=func.now(), nullable=False)
+
+
+class DailyAttempt(Base):
+    """One row per user per calendar day — enforces one Daily Challenge attempt
+    per day and is the source of truth for streaks."""
+
+    __tablename__ = "daily_attempts"
+    __table_args__ = (UniqueConstraint("user_id", "challenge_date", name="uq_daily_user_date"),)
+
+    id: Mapped[uuid.UUID] = _pk()
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    challenge_date: Mapped[_date] = mapped_column(Date, nullable=False, index=True)
+    case_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("clinical_cases.id"), nullable=False)
+    session_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("clinical_sessions.id", ondelete="CASCADE"), nullable=False
+    )
+    created_at: Mapped[datetime] = mapped_column(_TS, server_default=func.now(), nullable=False)
