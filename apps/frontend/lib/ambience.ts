@@ -1,20 +1,21 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 /**
- * Optional ambient clinic sound — generated with the Web Audio API (no audio
- * files): a soft low room tone plus an occasional gentle monitor beep. Off by
- * default; only starts on a user gesture (the toggle), per autoplay policy.
+ * Ambient clinic sound — generated with the Web Audio API (no audio files): a
+ * soft low room tone plus an occasional gentle monitor beep. Driven by the
+ * `enabled` flag (from settings). If the browser blocks autoplay, it resumes on
+ * the first user interaction.
  */
-export function useAmbience() {
-  const [on, setOn] = useState(false);
+export function useAmbience(enabled: boolean) {
   const ctxRef = useRef<AudioContext | null>(null);
 
   useEffect(() => {
-    if (!on) return;
+    if (!enabled) return;
     const Ctx =
-      window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      window.AudioContext ||
+      (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
     if (!Ctx) return;
     const ctx = new Ctx();
     ctxRef.current = ctx;
@@ -55,8 +56,19 @@ export function useAmbience() {
     };
     const interval = window.setInterval(beep, 9000);
 
+    // Autoplay policy: if the context starts suspended, resume on first gesture.
+    const resume = () => {
+      ctx.resume().catch(() => undefined);
+    };
+    if (ctx.state === "suspended") {
+      window.addEventListener("pointerdown", resume, { once: true });
+      window.addEventListener("keydown", resume, { once: true });
+    }
+
     return () => {
       window.clearInterval(interval);
+      window.removeEventListener("pointerdown", resume);
+      window.removeEventListener("keydown", resume);
       try {
         noise.stop();
       } catch {
@@ -65,7 +77,5 @@ export function useAmbience() {
       ctx.close().catch(() => undefined);
       ctxRef.current = null;
     };
-  }, [on]);
-
-  return { on, toggle: () => setOn((v) => !v) };
+  }, [enabled]);
 }

@@ -1,13 +1,14 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { ClinicScene, PatientFigure } from "@/app/components/clinic";
 import { CommitPanel, ExamPanel, TestsPanel } from "@/app/components/workspace";
 import { useAmbience } from "@/lib/ambience";
 import { api, streamPatientTurn, type MessageItem } from "@/lib/api";
+import { useSettings } from "@/lib/settings";
 
 type Tab = "exam" | "tests" | "commit";
 
@@ -28,8 +29,9 @@ export function ConsultRoom({
   streak?: number;
   onExit: () => void;
 }) {
-  const reduce = useReducedMotion();
-  const ambience = useAmbience();
+  const { motion: motionOn, sound, toggleSound } = useSettings();
+  const reduce = !motionOn; // settings drive animation; user choice overrides OS hint
+  useAmbience(sound);
 
   const session = useQuery({ queryKey: ["session", sessionId], queryFn: () => api.getSession(sessionId) });
   const messages = useQuery({ queryKey: ["messages", sessionId], queryFn: () => api.listMessages(sessionId) });
@@ -143,12 +145,12 @@ export function ConsultRoom({
               <span className="rounded-full border border-gold/40 bg-navy/40 px-3 py-1 text-sm text-gold-soft backdrop-blur">🔥 {streak}</span>
             )}
             <button
-              onClick={ambience.toggle}
-              aria-pressed={ambience.on}
-              title={ambience.on ? "Mute clinic ambience" : "Play clinic ambience"}
+              onClick={toggleSound}
+              aria-pressed={sound}
+              title={sound ? "Mute clinic ambience" : "Play clinic ambience"}
               className="rounded-full border border-cream-card/20 bg-navy/40 px-2.5 py-1 text-sm text-cream-card/80 backdrop-blur transition-colors hover:text-cream-card"
             >
-              {ambience.on ? "🔊" : "🔈"}
+              {sound ? "🔊" : "🔈"}
             </button>
             <span className="rounded-full bg-navy/50 px-3 py-1 text-xs text-cream-card/80 backdrop-blur">{sstatus} · {stage}</span>
             <button onClick={() => setDrawer(true)} className="btn-gold px-4 py-1.5 text-sm">Workspace</button>

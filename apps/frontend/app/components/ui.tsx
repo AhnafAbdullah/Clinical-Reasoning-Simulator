@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 
 import { useAuth } from "@/lib/auth";
+import { useSettings } from "@/lib/settings";
 
 export function Skeleton({ className = "" }: { className?: string }) {
   return <div aria-hidden className={`animate-pulse rounded-lg bg-cream-deep ${className}`} />;
@@ -86,6 +88,7 @@ export function NavBar() {
         {user && (
           <div className="flex items-center gap-3">
             <span className="hidden text-xs text-ink-soft sm:inline">{user.email}</span>
+            <SettingsMenu />
             <button onClick={logout} className="btn-ghost px-3 py-1.5 text-xs">
               Sign out
             </button>
@@ -94,5 +97,53 @@ export function NavBar() {
       </div>
       <div className="gold-rule" />
     </nav>
+  );
+}
+
+function Toggle({ on, onClick, label }: { on: boolean; onClick: () => void; label: string }) {
+  return (
+    <button
+      onClick={onClick}
+      role="switch"
+      aria-checked={on}
+      className="flex w-full items-center justify-between gap-4 rounded-lg px-2 py-1.5 text-sm text-ink hover:bg-cream-deep"
+    >
+      <span>{label}</span>
+      <span className={`relative h-5 w-9 rounded-full transition-colors ${on ? "bg-navy" : "bg-line"}`}>
+        <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-cream-card transition-all ${on ? "left-[18px]" : "left-0.5"}`} />
+      </span>
+    </button>
+  );
+}
+
+export function SettingsMenu() {
+  const { motion, sound, toggleMotion, toggleSound } = useSettings();
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        aria-label="Settings"
+        aria-expanded={open}
+        className="btn-ghost px-2.5 py-1.5 text-sm"
+        title="Settings"
+      >
+        ⚙
+      </button>
+      {open && (
+        <>
+          <div className="fixed inset-0 z-30" onClick={() => setOpen(false)} aria-hidden />
+          <div className="absolute right-0 z-40 mt-2 w-60 rounded-xl2 border border-line bg-cream-card p-2 shadow-lift">
+            <div className="flex items-center gap-2 px-2 pb-1">
+              <span className="gold-strip w-6" />
+              <span className="text-xs font-semibold uppercase tracking-wide text-ink-soft">Experience</span>
+            </div>
+            <Toggle on={motion} onClick={toggleMotion} label="Motion &amp; animation" />
+            <Toggle on={sound} onClick={toggleSound} label="Clinic ambience" />
+            <p className="px-2 pt-1 text-[11px] text-ink-soft">Applies in the consultation room.</p>
+          </div>
+        </>
+      )}
+    </div>
   );
 }
