@@ -46,3 +46,6 @@ Thumbs.db
 
 # ── Claude Code local settings ────────────────────────────────────────────────
 .claude/settings.local.json
+
+# ── Internal planning docs (not for the repo) ─────────────────────────────────
+docs/PHASE_C_VOICE_PLAN.md

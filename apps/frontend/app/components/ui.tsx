@@ -117,7 +117,7 @@ function Toggle({ on, onClick, label }: { on: boolean; onClick: () => void; labe
 }
 
 export function SettingsMenu() {
-  const { motion, sound, toggleMotion, toggleSound } = useSettings();
+  const { motion, sound, voice, toggleMotion, toggleSound, toggleVoice } = useSettings();
   const [open, setOpen] = useState(false);
   return (
     <div className="relative">
@@ -140,6 +140,7 @@ export function SettingsMenu() {
             </div>
             <Toggle on={motion} onClick={toggleMotion} label="Motion &amp; animation" />
             <Toggle on={sound} onClick={toggleSound} label="Clinic ambience" />
+            <Toggle on={voice} onClick={toggleVoice} label="Voice (speak &amp; listen)" />
             <p className="px-2 pt-1 text-[11px] text-ink-soft">Applies in the consultation room.</p>
           </div>
         </>

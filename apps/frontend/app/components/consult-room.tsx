@@ -9,6 +9,7 @@ import { CommitPanel, ExamPanel, TestsPanel } from "@/app/components/workspace";
 import { useAmbience } from "@/lib/ambience";
 import { api, streamPatientTurn, type MessageItem } from "@/lib/api";
 import { useSettings } from "@/lib/settings";
+import { useSpeechToText, useTextToSpeech } from "@/lib/voice";
 
 type Tab = "exam" | "tests" | "commit";
 
@@ -29,9 +30,10 @@ export function ConsultRoom({
   streak?: number;
   onExit: () => void;
 }) {
-  const { motion: motionOn, sound, toggleSound } = useSettings();
+  const { motion: motionOn, sound, voice, toggleSound } = useSettings();
   const reduce = !motionOn; // settings drive animation; user choice overrides OS hint
   useAmbience(sound);
+  const tts = useTextToSpeech();
 
   const session = useQuery({ queryKey: ["session", sessionId], queryFn: () => api.getSession(sessionId) });
   const messages = useQuery({ queryKey: ["messages", sessionId], queryFn: () => api.listMessages(sessionId) });
@@ -58,16 +60,26 @@ export function ConsultRoom({
   const sstatus = session.data?.status ?? "ACTIVE";
   const working = sstatus === "ACTIVE" && stage !== "MANAGEMENT";
 
+  // Accumulates the patient's streamed reply so we can speak the whole line on done.
+  const liveTextRef = useRef("");
   const streamTurn = useCallback(
     async (messageId: string) => {
       setLive("");
+      liveTextRef.current = "";
       await streamPatientTurn(sessionId, messageId, {
-        onToken: (t) => setLive((p) => (p ?? "") + t),
-        onDone: () => { setLive(null); messages.refetch(); },
+        onToken: (t) => {
+          liveTextRef.current += t;
+          setLive((p) => (p ?? "") + t);
+        },
+        onDone: () => {
+          setLive(null);
+          messages.refetch();
+          if (voice && tts.supported) tts.speak(liveTextRef.current, { gender: patient.data?.gender });
+        },
         onError: () => setLive(null),
       });
     },
-    [sessionId, messages],
+    [sessionId, messages, voice, tts, patient.data?.gender],
   );
 
   const streamedOpening = useRef(false);
@@ -77,8 +89,8 @@ export function ConsultRoom({
     streamTurn(openingMessageId);
   }, [openingMessageId, streamTurn]);
 
-  async function send() {
-    const text = draft.trim();
+  async function send(spoken?: string) {
+    const text = (spoken ?? draft).trim();
     if (!text || busy) return;
     setBusy(true);
     setDraft("");
@@ -91,6 +103,12 @@ export function ConsultRoom({
       session.refetch();
     }
   }
+
+  // Doctor dictation: stop the patient talking, then send the transcript as a turn.
+  const dictation = useSpeechToText((t) => { tts.cancel(); send(t); });
+
+  // Stop any in-flight speech when leaving the room.
+  useEffect(() => () => tts.cancel(), [tts]);
 
   return (
     <div className="fixed inset-0 overflow-hidden bg-navy">
@@ -134,7 +152,7 @@ export function ConsultRoom({
         className="absolute inset-0 z-20 flex flex-col"
       >
         <div className="flex items-center justify-between px-5 py-4">
-          <button onClick={onExit} className="text-sm text-cream-card/80 hover:text-cream-card">← Leave</button>
+          <button onClick={() => { tts.cancel(); onExit(); }} className="text-sm text-cream-card/80 hover:text-cream-card">← Leave</button>
           <div className="flex items-center gap-3">
             {patient.data?.name && (
               <span className="hidden rounded-full bg-navy/50 px-3 py-1 text-xs text-cream-card/80 backdrop-blur sm:inline">
@@ -175,7 +193,22 @@ export function ConsultRoom({
               onChange={(e) => setDraft(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && send()}
             />
-            <button onClick={send} disabled={!working || busy} className="btn-gold px-6">{busy ? "…" : "Ask"}</button>
+            {voice && dictation.supported && (
+              <button
+                onClick={() => (dictation.listening ? dictation.stop() : dictation.start())}
+                disabled={!working || busy}
+                aria-pressed={dictation.listening}
+                title={dictation.listening ? "Listening… click to stop" : "Speak to the patient"}
+                className={`grid w-12 place-items-center rounded-full border backdrop-blur transition-colors disabled:opacity-40 ${
+                  dictation.listening
+                    ? "animate-pulse border-gold bg-gold/20 text-gold-soft"
+                    : "border-cream-card/20 bg-navy/50 text-cream-card/80 hover:text-cream-card"
+                }`}
+              >
+                🎤
+              </button>
+            )}
+            <button onClick={() => send()} disabled={!working || busy} className="btn-gold px-6">{busy ? "…" : "Ask"}</button>
           </div>
         </div>
 
