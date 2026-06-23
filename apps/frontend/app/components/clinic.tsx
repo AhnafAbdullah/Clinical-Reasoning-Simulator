@@ -1,51 +1,15 @@
 "use client";
 
-import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
-import { useEffect } from "react";
+import { motion } from "framer-motion";
 
 /**
  * A stylised doctor's room rendered entirely as SVG (no binary assets, so it's
- * crisp at any size and themeable). When `parallax` is on, the scene gains 2.5D
- * depth: furniture layers drift against the pointer and dust motes float in the
- * daylight. Static (current look) otherwise — used for SSR and reduced motion.
+ * crisp at any size and themeable). This component is purely presentational:
+ * every element that should move carries a `data-anim` tag, and the cinematic
+ * engine (lib/cinematics) drives it procedurally. With the engine off (SSR /
+ * reduced motion) it renders as a calm static scene — motes stay invisible.
  */
-export function ClinicScene({ className = "", parallax = false }: { className?: string; parallax?: boolean }) {
-  return parallax ? <ParallaxScene className={className} /> : <SceneSVG className={className} />;
-}
-
-/** A few drifting dust motes lit by the window — pure SVG, parallaxed with the mid layer. */
-const MOTES = [
-  { cx: 180, cy: 220, r: 3, dur: 7, delay: 0 },
-  { cx: 300, cy: 180, r: 2, dur: 9, delay: 1.4 },
-  { cx: 420, cy: 300, r: 3.5, dur: 8, delay: 0.6 },
-  { cx: 250, cy: 340, r: 2.5, dur: 11, delay: 2.1 },
-  { cx: 480, cy: 160, r: 2, dur: 10, delay: 0.3 },
-  { cx: 150, cy: 380, r: 3, dur: 12, delay: 1.8 },
-];
-
-function ParallaxScene({ className = "" }: { className?: string }) {
-  const mx = useMotionValue(0);
-  const my = useMotionValue(0);
-  const sx = useSpring(mx, { stiffness: 60, damping: 18 });
-  const sy = useSpring(my, { stiffness: 60, damping: 18 });
-
-  // Depth: further objects drift less, nearer ones more.
-  const farX = useTransform(sx, (v) => v * 7);
-  const farY = useTransform(sy, (v) => v * 5);
-  const midX = useTransform(sx, (v) => v * 16);
-  const midY = useTransform(sy, (v) => v * 11);
-  const nearX = useTransform(sx, (v) => v * 30);
-  const nearY = useTransform(sy, (v) => v * 20);
-
-  useEffect(() => {
-    const onMove = (e: PointerEvent) => {
-      mx.set((e.clientX / window.innerWidth) * 2 - 1);
-      my.set((e.clientY / window.innerHeight) * 2 - 1);
-    };
-    window.addEventListener("pointermove", onMove);
-    return () => window.removeEventListener("pointermove", onMove);
-  }, [mx, my]);
-
+export function ClinicScene({ className = "" }: { className?: string }) {
   return (
     <svg
       className={className}
@@ -56,69 +20,48 @@ function ParallaxScene({ className = "" }: { className?: string }) {
     >
       <SceneDefs />
 
-      {/* Static base — never moves, so the parallax can't reveal edge gaps. */}
-      <rect x="-60" y="-60" width="1720" height="760" fill="url(#wall)" />
+      {/* Static base — never moves, so camera/parallax can't reveal edge gaps. */}
+      <rect x="-80" y="-80" width="1760" height="800" fill="url(#wall)" />
       <rect y="640" width="1600" height="320" fill="url(#floor)" />
       <rect y="632" width="1600" height="12" fill="#c2a14a" opacity="0.5" />
 
       {/* Far layer: things on the back wall */}
-      <motion.g style={{ x: farX, y: farY }}>
+      <g data-anim="layer-far">
         <Window />
         <Clock />
         <EyeChart />
-      </motion.g>
+      </g>
 
-      {/* Mid layer: furniture on the floor + floating motes */}
-      <motion.g style={{ x: midX, y: midY }}>
+      {/* Mid layer: furniture on the floor */}
+      <g data-anim="layer-mid">
         <Couch />
         <Desk />
         <Plant />
-        {MOTES.map((m, i) => (
-          <motion.circle
-            key={i}
-            cx={m.cx}
-            cy={m.cy}
-            r={m.r}
-            fill="#f3e6c2"
-            animate={{ y: [0, -16, 0], opacity: [0.12, 0.45, 0.12] }}
-            transition={{ duration: m.dur, delay: m.delay, repeat: Infinity, ease: "easeInOut" }}
-          />
-        ))}
-      </motion.g>
+      </g>
 
-      {/* Near layer: warm glow + foreground vignette for depth */}
-      <motion.g style={{ x: nearX, y: nearY }}>
-        <rect x="-60" y="-60" width="1720" height="1020" fill="url(#glow)" opacity="0.5" />
-      </motion.g>
+      {/* Near layer: living warm light + drifting dust */}
+      <g data-anim="layer-near">
+        <rect data-anim="light" x="-80" y="-80" width="1760" height="1060" fill="url(#glow)" opacity="0.45" />
+        {MOTES.map((m, i) => (
+          <circle key={i} data-anim="mote" cx={m.x} cy={m.y} r={m.r} fill="#f3e6c2" opacity="0" />
+        ))}
+      </g>
+
+      {/* Atmospheric depth + foreground vignette (static overlays) */}
+      <rect data-anim="fog" width="1600" height="900" fill="url(#fog)" opacity="0.22" />
       <rect width="1600" height="900" fill="url(#vignette)" />
     </svg>
   );
 }
 
-/** The original flat scene, drawn in one pass. */
-function SceneSVG({ className = "" }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 1600 900"
-      preserveAspectRatio="xMidYMid slice"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden
-    >
-      <SceneDefs />
-      <rect width="1600" height="640" fill="url(#wall)" />
-      <rect y="640" width="1600" height="260" fill="url(#floor)" />
-      <rect y="632" width="1600" height="12" fill="#c2a14a" opacity="0.5" />
-      <Window />
-      <Clock />
-      <EyeChart />
-      <Couch />
-      <Desk />
-      <Plant />
-      <rect width="1600" height="900" fill="url(#glow)" opacity="0.5" />
-    </svg>
-  );
-}
+const MOTES = [
+  { x: 180, y: 280, r: 3 }, { x: 300, y: 420, r: 2 }, { x: 420, y: 320, r: 3.5 },
+  { x: 250, y: 560, r: 2.5 }, { x: 480, y: 240, r: 2 }, { x: 150, y: 640, r: 3 },
+  { x: 700, y: 360, r: 2.5 }, { x: 900, y: 500, r: 2 }, { x: 1050, y: 300, r: 3 },
+  { x: 1250, y: 460, r: 2.5 }, { x: 1400, y: 360, r: 2 }, { x: 820, y: 620, r: 3 },
+  { x: 600, y: 520, r: 2 }, { x: 1150, y: 600, r: 2.5 }, { x: 360, y: 680, r: 2 },
+  { x: 980, y: 680, r: 3 },
+];
 
 function SceneDefs() {
   return (
@@ -139,6 +82,12 @@ function SceneDefs() {
         <stop offset="0" stopColor="#c2a14a" stopOpacity="0.30" />
         <stop offset="1" stopColor="#c2a14a" stopOpacity="0" />
       </radialGradient>
+      {/* Atmospheric fog — cool haze pooling toward the floor for depth. */}
+      <linearGradient id="fog" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stopColor="#8fb6dd" stopOpacity="0" />
+        <stop offset="0.7" stopColor="#7fa6cf" stopOpacity="0.05" />
+        <stop offset="1" stopColor="#6f96c2" stopOpacity="0.16" />
+      </linearGradient>
       {/* Foreground vignette — darkens the edges so the centre reads as nearer. */}
       <radialGradient id="vignette" cx="0.5" cy="0.5" r="0.75">
         <stop offset="0.55" stopColor="#0b1224" stopOpacity="0" />
@@ -148,7 +97,7 @@ function SceneDefs() {
   );
 }
 
-/* ── Scene props (shared by static + parallax scenes) ─────────────────────────── */
+/* ── Scene props ──────────────────────────────────────────────────────────── */
 
 function Window() {
   return (
@@ -231,9 +180,9 @@ function Plant() {
 }
 
 /**
- * A seated patient that varies by gender, age bracket and affect (Phase B).
- * Phase D: when `alive`, the figure breathes, sways and blinks; when `speaking`,
- * the mouth moves. Still a single parameterised SVG — no binary assets.
+ * A seated patient that varies by gender, age bracket and affect. When `alive`,
+ * the cinematic engine drives breathing, head motion, blinks, saccades and a
+ * speech-energy mouth via the `data-anim` tags below. Static otherwise.
  */
 export function PatientFigure({
   gender = "",
@@ -241,14 +190,12 @@ export function PatientFigure({
   affect = "calm",
   className = "",
   alive = false,
-  speaking = false,
 }: {
   gender?: string;
   age?: number | null;
   affect?: string;
   className?: string;
   alive?: boolean;
-  speaking?: boolean;
 }) {
   const female = gender.toLowerCase().startsWith("f");
   const bracket = age == null ? "adult" : age < 16 ? "child" : age >= 65 ? "elderly" : "adult";
@@ -269,9 +216,6 @@ export function PatientFigure({
             ? <path d="M127 175 L153 175" stroke="#9c6b3f" strokeWidth="3" strokeLinecap="round" />
             : <path d="M128 172 Q140 180 152 172" stroke="#9c6b3f" strokeWidth="3" fill="none" strokeLinecap="round" />;
 
-  // Breathing pace quickens for breathless/in-pain patients.
-  const breathDur = affect === "breathless" ? 2.1 : affect === "in_pain" ? 2.8 : 4.4;
-
   return (
     <svg className={className} viewBox="0 0 280 360" xmlns="http://www.w3.org/2000/svg" aria-hidden>
       <defs>
@@ -283,104 +227,84 @@ export function PatientFigure({
       <ellipse cx="140" cy="348" rx="92" ry="14" fill="#000" opacity="0.18" />
 
       <g transform={bracket === "child" ? "translate(140 360) scale(0.84) translate(-140 -360)" : undefined}>
-        {/* torso — breathes (scales subtly from the chest) */}
-        <motion.g
-          style={{ transformBox: "fill-box", transformOrigin: "center bottom" }}
-          animate={alive ? { scaleY: [1, 1.022, 1], scaleX: [1, 1.012, 1] } : undefined}
-          transition={alive ? { duration: breathDur, repeat: Infinity, ease: "easeInOut" } : undefined}
-        >
+        {/* torso — breathes from the chest (engine scales + lifts it) */}
+        <g data-anim="chest">
           <path d="M52 360 C52 250 86 214 140 214 C194 214 228 250 228 360 Z" fill="url(#coat)" />
           <path d="M140 214 L140 360" stroke="#c2a14a" strokeWidth="3" opacity="0.6" />
-        </motion.g>
+        </g>
 
-        {/* neck + head — sways gently (elderly leans slightly forward) */}
-        <motion.g
-          transform={bracket === "elderly" ? "translate(6 4)" : undefined}
-          animate={alive ? { x: [0, -2.2, 0, 2.2, 0], y: [0, 1, 0, 1, 0] } : undefined}
-          transition={alive ? { duration: 7.5, repeat: Infinity, ease: "easeInOut" } : undefined}
-        >
-          <rect x="124" y="176" width="32" height="40" rx="14" fill="#e3b58e" />
-          {female && <path d="M92 150 C88 210 100 240 116 244 L116 150 Z" fill={hair} />}
-          {female && <path d="M188 150 C192 210 180 240 164 244 L164 150 Z" fill={hair} />}
-          <circle cx="140" cy="150" r="46" fill={skin} />
-          <path d="M96 146 C96 96 184 96 184 146 C184 120 96 120 96 146 Z" fill={hair} />
+        {/* neck + head — engine translates/rotates this; inner g keeps elderly lean */}
+        <g data-anim="head">
+          <g transform={bracket === "elderly" ? "translate(6 4)" : undefined}>
+            <rect x="124" y="176" width="32" height="40" rx="14" fill="#e3b58e" />
+            {female && <path d="M92 150 C88 210 100 240 116 244 L116 150 Z" fill={hair} />}
+            {female && <path d="M188 150 C192 210 180 240 164 244 L164 150 Z" fill={hair} />}
+            <circle cx="140" cy="150" r="46" fill={skin} />
+            <path d="M96 146 C96 96 184 96 184 146 C184 120 96 120 96 146 Z" fill={hair} />
 
-          {/* brows */}
-          {worried ? (
-            <>
-              <path d="M116 138 L132 134" stroke="#7a5a3a" strokeWidth="3" strokeLinecap="round" />
-              <path d="M164 138 L148 134" stroke="#7a5a3a" strokeWidth="3" strokeLinecap="round" />
-            </>
-          ) : (
-            <>
-              <path d="M118 136 L132 136" stroke="#7a5a3a" strokeWidth="3" strokeLinecap="round" />
-              <path d="M148 136 L162 136" stroke="#7a5a3a" strokeWidth="3" strokeLinecap="round" />
-            </>
-          )}
+            {/* brows */}
+            {worried ? (
+              <>
+                <path d="M116 138 L132 134" stroke="#7a5a3a" strokeWidth="3" strokeLinecap="round" />
+                <path d="M164 138 L148 134" stroke="#7a5a3a" strokeWidth="3" strokeLinecap="round" />
+              </>
+            ) : (
+              <>
+                <path d="M118 136 L132 136" stroke="#7a5a3a" strokeWidth="3" strokeLinecap="round" />
+                <path d="M148 136 L162 136" stroke="#7a5a3a" strokeWidth="3" strokeLinecap="round" />
+              </>
+            )}
 
-          {/* eyes (drowsy = half-closed) */}
-          {drowsy ? (
-            <>
-              <path d="M118 150 Q124 154 130 150" stroke="#1e2a44" strokeWidth="3" fill="none" strokeLinecap="round" />
-              <path d="M150 150 Q156 154 162 150" stroke="#1e2a44" strokeWidth="3" fill="none" strokeLinecap="round" />
-            </>
-          ) : (
-            <>
-              <circle cx="124" cy="150" r="5" fill="#1e2a44" />
-              <circle cx="156" cy="150" r="5" fill="#1e2a44" />
-              {/* eyelids — blink periodically */}
-              {alive && (
-                <>
-                  <Eyelid x={116} y={140} fill={skin} />
-                  <Eyelid x={148} y={140} fill={skin} />
-                </>
-              )}
-            </>
-          )}
+            {/* eyes */}
+            {drowsy ? (
+              <>
+                <path d="M118 150 Q124 154 130 150" stroke="#1e2a44" strokeWidth="3" fill="none" strokeLinecap="round" />
+                <path d="M150 150 Q156 154 162 150" stroke="#1e2a44" strokeWidth="3" fill="none" strokeLinecap="round" />
+              </>
+            ) : (
+              <>
+                {/* pupils flick with idle saccades */}
+                <g data-anim="pupils">
+                  <circle cx="124" cy="150" r="5" fill="#1e2a44" />
+                  <circle cx="156" cy="150" r="5" fill="#1e2a44" />
+                </g>
+                {/* eyelids — engine blinks these (start open: scaleY 0) */}
+                {alive && (
+                  <>
+                    <rect
+                      data-anim="eyelid" data-px="124" data-py="140"
+                      x="116" y="140" width="16" height="14" rx="5" fill={skin}
+                      transform="translate(124 140) scale(1 0) translate(-124 -140)"
+                    />
+                    <rect
+                      data-anim="eyelid" data-px="156" data-py="140"
+                      x="148" y="140" width="16" height="14" rx="5" fill={skin}
+                      transform="translate(156 140) scale(1 0) translate(-156 -140)"
+                    />
+                  </>
+                )}
+              </>
+            )}
 
-          {/* elderly glasses */}
-          {bracket === "elderly" && (
-            <g stroke="#56607a" strokeWidth="2.5" fill="none">
-              <circle cx="124" cy="150" r="11" />
-              <circle cx="156" cy="150" r="11" />
-              <path d="M135 150 L145 150" />
-            </g>
-          )}
+            {/* elderly glasses */}
+            {bracket === "elderly" && (
+              <g stroke="#56607a" strokeWidth="2.5" fill="none">
+                <circle cx="124" cy="150" r="11" />
+                <circle cx="156" cy="150" r="11" />
+                <path d="M135 150 L145 150" />
+              </g>
+            )}
 
-          {/* mouth — talks while the patient is speaking, otherwise shows affect */}
-          {alive && speaking ? (
-            <motion.ellipse
-              cx="140"
-              cy="176"
-              fill="#7a3b32"
-              animate={{ ry: [2, 7, 3, 8, 2], rx: [7, 8, 7, 9, 7] }}
-              transition={{ duration: 0.34, repeat: Infinity, ease: "easeInOut" }}
-            />
-          ) : (
-            mouth
-          )}
+            {/* mouth — resting affect shape; engine cross-fades to the talking
+                ellipse and drives its opening from speech energy */}
+            <g data-anim="mouth-rest">{mouth}</g>
+            {alive && <ellipse data-anim="mouth-talk" cx="140" cy="176" rx="7" ry="1" fill="#7a3b32" opacity="0" />}
 
-          {sweaty && <path d="M182 132 q-5 9 0 13 q5 -4 0 -13" fill="#bfddf1" opacity="0.9" />}
-        </motion.g>
+            {sweaty && <path d="M182 132 q-5 9 0 13 q5 -4 0 -13" fill="#bfddf1" opacity="0.9" />}
+          </g>
+        </g>
       </g>
     </svg>
-  );
-}
-
-/** A skin-coloured lid that sweeps down over an eye on a slow blink loop. */
-function Eyelid({ x, y, fill }: { x: number; y: number; fill: string }) {
-  return (
-    <motion.rect
-      x={x}
-      y={y}
-      width={16}
-      height={14}
-      rx={5}
-      fill={fill}
-      style={{ transformBox: "fill-box", transformOrigin: "center top" }}
-      animate={{ scaleY: [0, 0, 1, 0, 0] }}
-      transition={{ duration: 4.2, times: [0, 0.93, 0.96, 0.99, 1], repeat: Infinity, ease: "easeInOut" }}
-    />
   );
 }
 

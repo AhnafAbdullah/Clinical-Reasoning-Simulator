@@ -8,6 +8,9 @@ export function useTextToSpeech() {
   const supported = typeof window !== "undefined" && "speechSynthesis" in window;
   const voicesRef = useRef<SpeechSynthesisVoice[]>([]);
   const [speaking, setSpeaking] = useState(false);
+  // Pseudo-amplitude the mouth animation reads: spikes on each spoken word and
+  // is decayed by the animation loop. Drives lip movement without audio access.
+  const energyRef = useRef(0);
 
   useEffect(() => {
     if (!supported) return;
@@ -44,8 +47,9 @@ export function useTextToSpeech() {
       u.rate = 1;
       u.pitch = (opts?.gender || "").toLowerCase().startsWith("f") ? 1.1 : 0.95;
       u.onstart = () => setSpeaking(true);
-      u.onend = () => setSpeaking(false);
-      u.onerror = () => setSpeaking(false);
+      u.onboundary = () => { energyRef.current = 0.6 + Math.random() * 0.4; };
+      u.onend = () => { setSpeaking(false); energyRef.current = 0; };
+      u.onerror = () => { setSpeaking(false); energyRef.current = 0; };
       synth.speak(u);
     },
     [supported],
@@ -54,9 +58,10 @@ export function useTextToSpeech() {
   const cancel = useCallback(() => {
     if (supported) window.speechSynthesis.cancel();
     setSpeaking(false);
+    energyRef.current = 0;
   }, [supported]);
 
-  return { supported, speaking, speak, cancel };
+  return { supported, speaking, energyRef, speak, cancel };
 }
 
 // ── Speech-to-text: the doctor speaks ─────────────────────────────────────────────

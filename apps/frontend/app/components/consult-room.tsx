@@ -8,6 +8,7 @@ import { ClinicScene, PatientFigure } from "@/app/components/clinic";
 import { CommitPanel, ExamPanel, TestsPanel } from "@/app/components/workspace";
 import { useAmbience } from "@/lib/ambience";
 import { api, streamPatientTurn, type MessageItem } from "@/lib/api";
+import { useCinematics } from "@/lib/cinematics";
 import { useSettings } from "@/lib/settings";
 import { useSpeechToText, useTextToSpeech } from "@/lib/voice";
 
@@ -110,40 +111,54 @@ export function ConsultRoom({
   // Stop any in-flight speech when leaving the room.
   useEffect(() => () => tts.cancel(), [tts]);
 
+  // Cinematic engine: one rAF loop drives camera, scene and patient procedurally.
+  const sceneCamRef = useRef<HTMLDivElement>(null);
+  const patientCamRef = useRef<HTMLDivElement>(null);
+  const speakingRef = useRef(false);
+  speakingRef.current = tts.speaking;
+  useCinematics({
+    enabled: !reduce,
+    sceneRef: sceneCamRef,
+    patientRef: patientCamRef,
+    speakingRef,
+    energyRef: tts.energyRef,
+    revision: patient.data ? `${patient.data.gender}-${patient.data.age}-${patient.data.affect}` : "loading",
+  });
+
   return (
     <div className="fixed inset-0 overflow-hidden bg-navy">
-      {/* Clinic backdrop — un-blurs/settles as you enter the room */}
+      {/* Clinic backdrop — un-blurs/settles as you enter the room. The inner
+          div is the camera the engine pans (kept separate from framer-motion's
+          entrance transform so they don't fight). */}
       <motion.div
         className="absolute inset-0"
         initial={false}
         animate={{ scale: entered ? 1 : reduce ? 1 : 1.14, filter: entered ? "blur(2px)" : "blur(12px)" }}
         transition={{ duration: reduce ? 0 : 1.6, ease: [0.22, 1, 0.36, 1] }}
       >
-        <ClinicScene className="h-full w-full" parallax={!reduce} />
+        <div ref={sceneCamRef} className="absolute inset-0" style={{ willChange: "transform" }}>
+          <ClinicScene className="h-full w-full" />
+        </div>
       </motion.div>
       <div className="absolute inset-0 bg-navy/35" />
 
-      {/* Patient avatar (walks in, then idle-breathes) */}
+      {/* Patient avatar — walks in (framer-motion), then the engine takes over:
+          breathing, head motion, blinks, saccades, speech-driven mouth. */}
       <motion.div
         initial={{ opacity: 0, y: reduce ? 0 : 60, x: reduce ? 0 : -28 }}
         animate={{ opacity: 1, y: 0, x: 0 }}
         transition={{ duration: reduce ? 0 : 0.9, delay: reduce ? 0 : 0.45, ease: "easeOut" }}
         className="pointer-events-none absolute bottom-0 left-2 z-10 w-[clamp(150px,20vw,290px)] sm:left-10"
       >
-        <motion.div
-          animate={reduce ? undefined : { y: [0, -3, 0], scale: [1, 1.012, 1] }}
-          transition={reduce ? undefined : { duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
-          style={{ transformOrigin: "bottom center" }}
-        >
+        <div ref={patientCamRef} style={{ willChange: "transform" }}>
           <PatientFigure
             gender={patient.data?.gender}
             age={patient.data?.age ?? null}
             affect={patient.data?.affect}
             alive={!reduce}
-            speaking={tts.speaking}
             className="h-auto w-full drop-shadow-2xl"
           />
-        </motion.div>
+        </div>
       </motion.div>
 
       {/* Foreground UI */}
