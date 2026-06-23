@@ -119,7 +119,7 @@ export function ConsultRoom({
         animate={{ scale: entered ? 1 : reduce ? 1 : 1.14, filter: entered ? "blur(2px)" : "blur(12px)" }}
         transition={{ duration: reduce ? 0 : 1.6, ease: [0.22, 1, 0.36, 1] }}
       >
-        <ClinicScene className="h-full w-full" />
+        <ClinicScene className="h-full w-full" parallax={!reduce} />
       </motion.div>
       <div className="absolute inset-0 bg-navy/35" />
 
@@ -139,6 +139,8 @@ export function ConsultRoom({
             gender={patient.data?.gender}
             age={patient.data?.age ?? null}
             affect={patient.data?.affect}
+            alive={!reduce}
+            speaking={tts.speaking}
             className="h-auto w-full drop-shadow-2xl"
           />
         </motion.div>

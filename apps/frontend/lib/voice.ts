@@ -7,6 +7,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 export function useTextToSpeech() {
   const supported = typeof window !== "undefined" && "speechSynthesis" in window;
   const voicesRef = useRef<SpeechSynthesisVoice[]>([]);
+  const [speaking, setSpeaking] = useState(false);
 
   useEffect(() => {
     if (!supported) return;
@@ -42,6 +43,9 @@ export function useTextToSpeech() {
       if (v) u.voice = v;
       u.rate = 1;
       u.pitch = (opts?.gender || "").toLowerCase().startsWith("f") ? 1.1 : 0.95;
+      u.onstart = () => setSpeaking(true);
+      u.onend = () => setSpeaking(false);
+      u.onerror = () => setSpeaking(false);
       synth.speak(u);
     },
     [supported],
@@ -49,9 +53,10 @@ export function useTextToSpeech() {
 
   const cancel = useCallback(() => {
     if (supported) window.speechSynthesis.cancel();
+    setSpeaking(false);
   }, [supported]);
 
-  return { supported, speak, cancel };
+  return { supported, speaking, speak, cancel };
 }
 
 // ── Speech-to-text: the doctor speaks ─────────────────────────────────────────────
