@@ -7,15 +7,19 @@ import { useCallback, useEffect, useRef, useState } from "react";
 function pickVoice(voices: SpeechSynthesisVoice[], gender?: string): SpeechSynthesisVoice | undefined {
   const en = voices.filter((v) => v.lang?.toLowerCase().startsWith("en"));
   if (!en.length) return undefined;
+  // Prefer on-device voices: Edge/Chrome also list "online/natural" voices that
+  // can stay silent without network — local ones are reliable and deploy-safe.
+  const local = en.filter((v) => v.localService);
+  const pool = local.length ? local : en;
   const female = /female|woman|zira|samantha|hazel|susan|fiona|tessa|aria|jenny|eva/i;
   const male = /male|man|david|mark|george|daniel|fred|alex|guy|ryan/i;
   const g = (gender || "").toLowerCase();
   const want = g.startsWith("f") ? female : g.startsWith("m") ? male : null;
   if (want) {
-    const match = en.find((v) => want.test(v.name));
+    const match = pool.find((v) => want.test(v.name));
     if (match) return match;
   }
-  return en.find((v) => v.default) ?? en[0];
+  return pool.find((v) => v.default) ?? pool[0];
 }
 
 export function useTextToSpeech() {
@@ -56,6 +60,7 @@ export function useTextToSpeech() {
     u.onend = () => { setSpeaking(false); energyRef.current = 0; };
     u.onerror = () => { setSpeaking(false); energyRef.current = 0; };
     synth.speak(u);
+    synth.resume(); // counter the Chromium/Edge "stuck paused" state
   }, []);
 
   // Record the first user gesture (sticky activation) and flush a deferred line.

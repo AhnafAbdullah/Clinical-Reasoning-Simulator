@@ -30,16 +30,42 @@ export function useAmbience(enabled: boolean) {
       last = (last + 0.02 * white) / 1.02;
       data[i] = last * 3.2;
     }
+    // Low room tone — soft filtered brown noise.
     const noise = ctx.createBufferSource();
     noise.buffer = buffer;
     noise.loop = true;
     const lp = ctx.createBiquadFilter();
     lp.type = "lowpass";
-    lp.frequency.value = 460;
-    const gain = ctx.createGain();
-    gain.gain.value = 0.04;
-    noise.connect(lp).connect(gain).connect(ctx.destination);
+    lp.frequency.value = 540;
+    const noiseGain = ctx.createGain();
+    noiseGain.gain.value = 0.06;
+    noise.connect(lp).connect(noiseGain).connect(ctx.destination);
     noise.start();
+
+    // Warm ambient pad — two quiet, slightly detuned low sines (a fifth apart),
+    // breathing via a slow tremolo so it never sits perfectly still.
+    const padGain = ctx.createGain();
+    padGain.gain.value = 0.03;
+    const padLp = ctx.createBiquadFilter();
+    padLp.type = "lowpass";
+    padLp.frequency.value = 700;
+    padGain.connect(padLp).connect(ctx.destination);
+    const pad1 = ctx.createOscillator();
+    pad1.type = "sine";
+    pad1.frequency.value = 98; // ~G2
+    const pad2 = ctx.createOscillator();
+    pad2.type = "sine";
+    pad2.frequency.value = 147; // a fifth above
+    pad1.connect(padGain);
+    pad2.connect(padGain);
+    const lfo = ctx.createOscillator();
+    lfo.frequency.value = 0.06;
+    const lfoGain = ctx.createGain();
+    lfoGain.gain.value = 0.012;
+    lfo.connect(lfoGain).connect(padGain.gain);
+    pad1.start();
+    pad2.start();
+    lfo.start();
 
     const beep = () => {
       const o = ctx.createOscillator();
@@ -49,12 +75,12 @@ export function useAmbience(enabled: boolean) {
       g.gain.value = 0;
       o.connect(g).connect(ctx.destination);
       const t = ctx.currentTime;
-      g.gain.linearRampToValueAtTime(0.018, t + 0.02);
+      g.gain.linearRampToValueAtTime(0.025, t + 0.02);
       g.gain.exponentialRampToValueAtTime(0.0001, t + 0.5);
       o.start();
       o.stop(t + 0.55);
     };
-    const interval = window.setInterval(beep, 9000);
+    const interval = window.setInterval(beep, 11000);
 
     // Autoplay policy: a fresh AudioContext almost always starts "suspended"
     // until a user gesture. Try immediately (in case we already have activation),
@@ -78,10 +104,12 @@ export function useAmbience(enabled: boolean) {
       window.clearInterval(interval);
       window.removeEventListener("pointerdown", resume);
       window.removeEventListener("keydown", resume);
-      try {
-        noise.stop();
-      } catch {
-        /* already stopped */
+      for (const s of [noise, pad1, pad2, lfo]) {
+        try {
+          s.stop();
+        } catch {
+          /* already stopped */
+        }
       }
       ctx.close().catch(() => undefined);
       ctxRef.current = null;

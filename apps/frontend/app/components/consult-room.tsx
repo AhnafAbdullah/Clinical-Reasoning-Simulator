@@ -127,8 +127,11 @@ export function ConsultRoom({
   // Doctor dictation: stop the patient talking, then send the transcript as a turn.
   const dictation = useSpeechToText((t) => { tts.cancel(); send(t); });
 
-  // Stop any in-flight speech when leaving the room.
-  useEffect(() => () => tts.cancel(), [tts]);
+  // Stop any in-flight speech when leaving the room. Depend on the STABLE cancel
+  // (not the whole tts object, which is a new identity every render — that made
+  // this cleanup fire on every re-render and cut the patient off mid-sentence).
+  const { cancel: cancelSpeech } = tts;
+  useEffect(() => () => cancelSpeech(), [cancelSpeech]);
 
   // Cinematic engine: one rAF loop drives camera, scene and patient procedurally.
   const sceneCamRef = useRef<HTMLDivElement>(null);
