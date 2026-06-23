@@ -14,6 +14,25 @@ import { useSpeechToText, useTextToSpeech } from "@/lib/voice";
 
 type Tab = "exam" | "tests" | "commit";
 
+/** Turn a SpeechRecognition error code into a one-line hint (empty = stay quiet). */
+function micHint(code: string): string {
+  switch (code) {
+    case "not-allowed":
+    case "service-not-allowed":
+      return "Microphone blocked — allow mic access for this site, and turn on Windows ‘Online speech recognition’.";
+    case "audio-capture":
+      return "No microphone available — is another app (e.g. Zoom) using it?";
+    case "network":
+      return "Speech service unreachable — check your connection.";
+    case "no-speech":
+      return "Didn’t catch that — try speaking again.";
+    case "aborted":
+      return ""; // normal on manual stop — no message
+    default:
+      return `Microphone error: ${code}.`;
+  }
+}
+
 /**
  * The immersive, room-based consultation used by EVERY case (classic sessions
  * and the Daily Challenge). Renders the clinic, a per-case patient avatar, the
@@ -201,31 +220,38 @@ export function ConsultRoom({
 
         {/* Doctor input */}
         <div className="px-4 pb-5">
-          <div className="mx-auto flex max-w-2xl gap-2">
-            <input
-              className="flex-1 rounded-full border border-cream-card/20 bg-navy/50 px-5 py-3 text-cream-card placeholder:text-cream-card/40 backdrop-blur focus:border-gold focus:outline-none"
-              placeholder={working ? "Ask the patient…" : "Consultation closed — open the Workspace to commit."}
-              value={draft}
-              disabled={!working || busy}
-              onChange={(e) => setDraft(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && send()}
-            />
-            {voice && dictation.supported && (
-              <button
-                onClick={() => (dictation.listening ? dictation.stop() : dictation.start())}
+          <div className="mx-auto max-w-2xl">
+            <div className="flex gap-2">
+              <input
+                className="flex-1 rounded-full border border-cream-card/20 bg-navy/50 px-5 py-3 text-cream-card placeholder:text-cream-card/40 backdrop-blur focus:border-gold focus:outline-none"
+                placeholder={working ? "Ask the patient…" : "Consultation closed — open the Workspace to commit."}
+                value={draft}
                 disabled={!working || busy}
-                aria-pressed={dictation.listening}
-                title={dictation.listening ? "Listening… click to stop" : "Speak to the patient"}
-                className={`grid w-12 place-items-center rounded-full border backdrop-blur transition-colors disabled:opacity-40 ${
-                  dictation.listening
-                    ? "animate-pulse border-gold bg-gold/20 text-gold-soft"
-                    : "border-cream-card/20 bg-navy/50 text-cream-card/80 hover:text-cream-card"
-                }`}
-              >
-                🎤
-              </button>
+                onChange={(e) => setDraft(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && send()}
+              />
+              {voice && dictation.supported && (
+                <button
+                  onClick={() => (dictation.listening ? dictation.stop() : dictation.start())}
+                  disabled={!working || busy}
+                  aria-pressed={dictation.listening}
+                  title={dictation.listening ? "Listening… click to stop" : "Speak to the patient"}
+                  className={`grid w-12 place-items-center rounded-full border backdrop-blur transition-colors disabled:opacity-40 ${
+                    dictation.listening
+                      ? "animate-pulse border-gold bg-gold/20 text-gold-soft"
+                      : "border-cream-card/20 bg-navy/50 text-cream-card/80 hover:text-cream-card"
+                  }`}
+                >
+                  🎤
+                </button>
+              )}
+              <button onClick={() => send()} disabled={!working || busy} className="btn-gold px-6">{busy ? "…" : "Ask"}</button>
+            </div>
+            {voice && dictation.supported && dictation.error && micHint(dictation.error) && (
+              <p className="mt-1.5 px-3 text-center text-xs text-amber-300/90" role="status">
+                {micHint(dictation.error)}
+              </p>
             )}
-            <button onClick={() => send()} disabled={!working || busy} className="btn-gold px-6">{busy ? "…" : "Ask"}</button>
           </div>
         </div>
 

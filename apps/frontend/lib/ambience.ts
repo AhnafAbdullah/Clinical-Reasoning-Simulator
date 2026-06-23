@@ -56,14 +56,23 @@ export function useAmbience(enabled: boolean) {
     };
     const interval = window.setInterval(beep, 9000);
 
-    // Autoplay policy: if the context starts suspended, resume on first gesture.
+    // Autoplay policy: a fresh AudioContext almost always starts "suspended"
+    // until a user gesture. Try immediately (in case we already have activation),
+    // and on every gesture until it's actually running — then stop listening.
     const resume = () => {
-      ctx.resume().catch(() => undefined);
+      ctx
+        .resume()
+        .then(() => {
+          if (ctx.state === "running") {
+            window.removeEventListener("pointerdown", resume);
+            window.removeEventListener("keydown", resume);
+          }
+        })
+        .catch(() => undefined);
     };
-    if (ctx.state === "suspended") {
-      window.addEventListener("pointerdown", resume, { once: true });
-      window.addEventListener("keydown", resume, { once: true });
-    }
+    resume();
+    window.addEventListener("pointerdown", resume);
+    window.addEventListener("keydown", resume);
 
     return () => {
       window.clearInterval(interval);
