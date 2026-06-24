@@ -2,9 +2,10 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type CSSProperties, type RefObject } from "react";
 
 import { ClinicScene, PatientFigure } from "@/app/components/clinic";
+import { SettingsMenu } from "@/app/components/ui";
 import { CommitPanel, ExamPanel, TestsPanel } from "@/app/components/workspace";
 import { useAmbience } from "@/lib/ambience";
 import { api, streamPatientTurn, type MessageItem } from "@/lib/api";
@@ -33,6 +34,15 @@ function micHint(code: string): string {
   }
 }
 
+const TOUR_KEY = "crs_tour_seen";
+
+interface TourStep {
+  ref: RefObject<HTMLElement | null>;
+  title: string;
+  body: string;
+  place: "top" | "bottom" | "left" | "right";
+}
+
 /**
  * The immersive, room-based consultation used by EVERY case (classic sessions
  * and the Daily Challenge). Renders the clinic, a per-case patient avatar, the
@@ -50,7 +60,7 @@ export function ConsultRoom({
   streak?: number;
   onExit: () => void;
 }) {
-  const { motion: motionOn, sound, voice, toggleSound } = useSettings();
+  const { motion: motionOn, sound, voice, voiceInput, toggleSound } = useSettings();
   const reduce = !motionOn; // settings drive animation; user choice overrides OS hint
   useAmbience(sound);
   const tts = useTextToSpeech();
@@ -65,6 +75,13 @@ export function ConsultRoom({
   const [busy, setBusy] = useState(false);
   const [drawer, setDrawer] = useState(false);
   const [tab, setTab] = useState<Tab>("exam");
+
+  // First-run guided tour. Targets these elements with arrow callouts.
+  const [showTour, setShowTour] = useState(false);
+  const tourTranscriptRef = useRef<HTMLDivElement>(null);
+  const tourInputRef = useRef<HTMLDivElement>(null);
+  const tourWorkspaceRef = useRef<HTMLButtonElement>(null);
+  const tourControlsRef = useRef<HTMLDivElement>(null);
 
   // Walk-in cinematic on mount.
   useEffect(() => {
@@ -147,6 +164,46 @@ export function ConsultRoom({
     revision: patient.data ? `${patient.data.gender}-${patient.data.age}-${patient.data.affect}` : "loading",
   });
 
+  // Show the guided tour once, after the walk-in settles, for first-time users.
+  useEffect(() => {
+    if (entered && typeof window !== "undefined" && localStorage.getItem(TOUR_KEY) !== "1") {
+      const t = setTimeout(() => setShowTour(true), 600);
+      return () => clearTimeout(t);
+    }
+  }, [entered]);
+
+  const finishTour = () => {
+    if (typeof window !== "undefined") localStorage.setItem(TOUR_KEY, "1");
+    setShowTour(false);
+  };
+
+  const tourSteps: TourStep[] = [
+    {
+      ref: tourTranscriptRef,
+      title: "Meet your patient",
+      body: "This is your consultation. Ask questions to take a focused history — the patient's replies appear here, and (with Voice on) are spoken aloud.",
+      place: "right",
+    },
+    {
+      ref: tourInputRef,
+      title: "Ask — type or speak",
+      body: "Type a question and press Ask. Or tap the 🎤 mic to speak it aloud. You can switch voice commands on/off in ⚙ Settings.",
+      place: "top",
+    },
+    {
+      ref: tourWorkspaceRef,
+      title: "Examine & submit here",
+      body: "Open the Workspace to examine the patient, order tests, and commit your diagnosis & management — this is where you submit your solution.",
+      place: "left",
+    },
+    {
+      ref: tourControlsRef,
+      title: "Settings & controls",
+      body: "Open ⚙ Settings for voice, motion & sound. Mute the ambience with 🔊, track the case stage, or replay this tour with ?. Use ← Leave to exit.",
+      place: "bottom",
+    },
+  ];
+
   return (
     <div className="fixed inset-0 overflow-hidden bg-navy">
       {/* Clinic backdrop — un-blurs/settles as you enter the room. The inner
@@ -192,7 +249,7 @@ export function ConsultRoom({
       >
         <div className="flex items-center justify-between px-5 py-4">
           <button onClick={() => { tts.cancel(); onExit(); }} className="text-sm text-cream-card/80 hover:text-cream-card">← Leave</button>
-          <div className="flex items-center gap-3">
+          <div ref={tourControlsRef} className="flex items-center gap-3">
             {patient.data?.name && (
               <span className="hidden rounded-full bg-navy/50 px-3 py-1 text-xs text-cream-card/80 backdrop-blur sm:inline">
                 {patient.data.name}{patient.data.age ? `, ${patient.data.age}` : ""}
@@ -202,6 +259,14 @@ export function ConsultRoom({
               <span className="rounded-full border border-gold/40 bg-navy/40 px-3 py-1 text-sm text-gold-soft backdrop-blur">🔥 {streak}</span>
             )}
             <button
+              onClick={() => setShowTour(true)}
+              title="Replay the tour"
+              aria-label="Replay the tour"
+              className="rounded-full border border-cream-card/20 bg-navy/40 px-2.5 py-1 text-sm text-cream-card/80 backdrop-blur transition-colors hover:text-cream-card"
+            >
+              ?
+            </button>
+            <button
               onClick={toggleSound}
               aria-pressed={sound}
               title={sound ? "Mute clinic ambience" : "Play clinic ambience"}
@@ -209,21 +274,22 @@ export function ConsultRoom({
             >
               {sound ? "🔊" : "🔈"}
             </button>
-            <span className="rounded-full bg-navy/50 px-3 py-1 text-xs text-cream-card/80 backdrop-blur">{sstatus} · {stage}</span>
-            <button onClick={() => setDrawer(true)} className="btn-gold px-4 py-1.5 text-sm">Workspace</button>
+            <SettingsMenu triggerClassName="rounded-full border border-cream-card/20 bg-navy/40 px-2.5 py-1 text-sm text-cream-card/80 backdrop-blur transition-colors hover:text-cream-card" />
+            <span className="hidden rounded-full bg-navy/50 px-3 py-1 text-xs text-cream-card/80 backdrop-blur sm:inline">{sstatus} · {stage}</span>
+            <button ref={tourWorkspaceRef} onClick={() => setDrawer(true)} className="btn-gold px-4 py-1.5 text-sm">Workspace</button>
           </div>
         </div>
 
         {/* Transcript fills the height */}
         <div className="pointer-events-none flex min-h-0 flex-1">
-          <div className="pointer-events-auto flex min-h-0 w-full px-3 sm:ml-[clamp(160px,20vw,320px)] sm:w-[clamp(320px,44vw,560px)]">
+          <div ref={tourTranscriptRef} className="pointer-events-auto flex min-h-0 w-full px-3 sm:ml-[clamp(160px,20vw,320px)] sm:w-[clamp(320px,44vw,560px)]">
             <Transcript messages={messages.data ?? []} live={live} />
           </div>
         </div>
 
         {/* Doctor input */}
         <div className="px-4 pb-5">
-          <div className="mx-auto max-w-2xl">
+          <div ref={tourInputRef} className="mx-auto max-w-2xl">
             <div className="flex gap-2">
               <input
                 className="flex-1 rounded-full border border-cream-card/20 bg-navy/50 px-5 py-3 text-cream-card placeholder:text-cream-card/40 backdrop-blur focus:border-gold focus:outline-none"
@@ -233,7 +299,7 @@ export function ConsultRoom({
                 onChange={(e) => setDraft(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && send()}
               />
-              {voice && dictation.supported && (
+              {voiceInput && dictation.supported && (
                 <button
                   onClick={() => (dictation.listening ? dictation.stop() : dictation.start())}
                   disabled={!working || busy}
@@ -250,7 +316,7 @@ export function ConsultRoom({
               )}
               <button onClick={() => send()} disabled={!working || busy} className="btn-gold px-6">{busy ? "…" : "Ask"}</button>
             </div>
-            {voice && dictation.supported && dictation.error && micHint(dictation.error) && (
+            {voiceInput && dictation.supported && dictation.error && micHint(dictation.error) && (
               <p className="mt-1.5 px-3 text-center text-xs text-amber-300/90" role="status">
                 {micHint(dictation.error)}
               </p>
@@ -291,6 +357,9 @@ export function ConsultRoom({
           )}
         </AnimatePresence>
       </motion.div>
+
+      {/* First-run guided tour overlay */}
+      <AnimatePresence>{showTour && <RoomTour steps={tourSteps} onClose={finishTour} />}</AnimatePresence>
     </div>
   );
 }
@@ -342,6 +411,100 @@ function ChatTurn({ role, text, typing, latest }: { role: string; text: string; 
           {!isDoctor && <span className="gold-strip mb-1.5 block w-7" />}
           {text}
           {typing && <span className="ml-0.5 inline-block h-4 w-[2px] animate-pulse bg-navy align-middle" />}
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+/**
+ * A first-run guided tour: dims the room, spotlights each target element and
+ * floats an arrow-pointed callout beside it. Positions are measured from the
+ * live element rects so the arrows track the real UI on any screen size.
+ */
+function RoomTour({ steps, onClose }: { steps: TourStep[]; onClose: () => void }) {
+  const [i, setI] = useState(0);
+  const [target, setTarget] = useState<DOMRect | null>(null);
+  const [pos, setPos] = useState<{ left: number; top: number; ax: number; ay: number } | null>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const step = steps[i];
+  const last = i === steps.length - 1;
+  const gap = 14;
+
+  // Measure the spotlighted element (and keep it in sync on resize).
+  useEffect(() => {
+    const measure = () => setTarget(step?.ref.current?.getBoundingClientRect() ?? null);
+    measure();
+    const id = window.setTimeout(measure, 60); // after any layout settle
+    window.addEventListener("resize", measure);
+    return () => { window.clearTimeout(id); window.removeEventListener("resize", measure); };
+  }, [step]);
+
+  // Place the callout next to the target, clamped on-screen; aim the arrow.
+  useEffect(() => {
+    if (!target || !cardRef.current) { setPos(null); return; }
+    const c = cardRef.current.getBoundingClientRect();
+    const vw = window.innerWidth, vh = window.innerHeight, pad = 12;
+    const cx = target.left + target.width / 2;
+    const cy = target.top + target.height / 2;
+    let left: number, top: number;
+    switch (step.place) {
+      case "top": top = target.top - gap - c.height; left = cx - c.width / 2; break;
+      case "bottom": top = target.bottom + gap; left = cx - c.width / 2; break;
+      case "left": left = target.left - gap - c.width; top = cy - c.height / 2; break;
+      default: left = target.right + gap; top = cy - c.height / 2; break;
+    }
+    left = Math.min(Math.max(left, pad), vw - c.width - pad);
+    top = Math.min(Math.max(top, pad), vh - c.height - pad);
+    const ax = Math.min(Math.max(cx - left, 18), c.width - 18);
+    const ay = Math.min(Math.max(cy - top, 18), c.height - 18);
+    setPos({ left, top, ax, ay });
+  }, [target, step.place]);
+
+  const place = step.place;
+  const arrowStyle: CSSProperties =
+    place === "bottom" ? { left: (pos?.ax ?? 0) - 6, top: -6, borderRight: "none", borderBottom: "none" }
+    : place === "top" ? { left: (pos?.ax ?? 0) - 6, bottom: -6, borderLeft: "none", borderTop: "none" }
+    : place === "left" ? { top: (pos?.ay ?? 0) - 6, right: -6, borderLeft: "none", borderBottom: "none" }
+    : { top: (pos?.ay ?? 0) - 6, left: -6, borderRight: "none", borderTop: "none" };
+
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50">
+      {/* click-blocking layer */}
+      <div className="absolute inset-0" onClick={(e) => e.stopPropagation()} />
+      {/* spotlight (dims everything except the target via a huge box-shadow) */}
+      {target ? (
+        <div
+          className="pointer-events-none absolute"
+          style={{
+            left: target.left - 6, top: target.top - 6, width: target.width + 12, height: target.height + 12,
+            borderRadius: 14, boxShadow: "0 0 0 9999px rgba(8,12,24,0.74)", outline: "2px solid #dec987", outlineOffset: 2,
+          }}
+        />
+      ) : (
+        <div className="absolute inset-0 bg-navy/75" />
+      )}
+
+      <div
+        ref={cardRef}
+        className="absolute w-72 rounded-xl2 border border-line bg-cream-card p-4 text-ink shadow-lift"
+        style={{ left: pos?.left ?? -9999, top: pos?.top ?? -9999, visibility: pos ? "visible" : "hidden" }}
+      >
+        {pos && <span className="absolute h-3 w-3 rotate-45 border border-line bg-cream-card" style={arrowStyle} />}
+        <div className="mb-1 flex items-center gap-2">
+          <span className="gold-strip w-6" />
+          <span className="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">{i + 1} / {steps.length}</span>
+        </div>
+        <h3 className="font-display text-base font-semibold text-navy">{step.title}</h3>
+        <p className="mt-1 text-sm leading-relaxed text-ink-soft">{step.body}</p>
+        <div className="mt-3 flex items-center justify-between">
+          <button onClick={onClose} className="text-xs text-ink-soft hover:text-navy">Skip</button>
+          <div className="flex gap-2">
+            {i > 0 && <button onClick={() => setI((n) => n - 1)} className="btn-ghost px-3 py-1.5 text-xs">Back</button>}
+            <button onClick={() => (last ? onClose() : setI((n) => n + 1))} className="btn-gold px-4 py-1.5 text-xs">
+              {last ? "Got it" : "Next"}
+            </button>
+          </div>
         </div>
       </div>
     </motion.div>

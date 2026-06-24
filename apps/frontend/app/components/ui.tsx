@@ -116,8 +116,8 @@ function Toggle({ on, onClick, label }: { on: boolean; onClick: () => void; labe
   );
 }
 
-export function SettingsMenu() {
-  const { motion, sound, voice, toggleMotion, toggleSound, toggleVoice } = useSettings();
+export function SettingsMenu({ triggerClassName = "btn-ghost px-2.5 py-1.5 text-sm" }: { triggerClassName?: string }) {
+  const { motion, sound, voice, voiceInput, toggleMotion, toggleSound, toggleVoice, toggleVoiceInput } = useSettings();
   const [open, setOpen] = useState(false);
   return (
     <div className="relative">
@@ -125,7 +125,7 @@ export function SettingsMenu() {
         onClick={() => setOpen((v) => !v)}
         aria-label="Settings"
         aria-expanded={open}
-        className="btn-ghost px-2.5 py-1.5 text-sm"
+        className={triggerClassName}
         title="Settings"
       >
         ⚙
@@ -140,7 +140,8 @@ export function SettingsMenu() {
             </div>
             <Toggle on={motion} onClick={toggleMotion} label="Motion &amp; animation" />
             <Toggle on={sound} onClick={toggleSound} label="Clinic ambience" />
-            <Toggle on={voice} onClick={toggleVoice} label="Voice (speak &amp; listen)" />
+            <Toggle on={voice} onClick={toggleVoice} label="Voice — patient speaks" />
+            <Toggle on={voiceInput} onClick={toggleVoiceInput} label="Voice commands (mic)" />
             <p className="px-2 pt-1 text-[11px] text-ink-soft">Applies in the consultation room.</p>
           </div>
         </>
