@@ -27,6 +27,13 @@ async def test_one_active_generation_per_session() -> None:
     assert await buffer.begin("session-1", "msg-c") is True
 
 
+async def test_session_of_maps_generation_to_its_session() -> None:
+    buffer = InMemoryGenerationBuffer()
+    await buffer.begin("session-1", "msg-a")
+    assert await buffer.session_of("msg-a") == "session-1"
+    assert await buffer.session_of("msg-unknown") is None
+
+
 async def test_buffer_replays_and_resumes_from_offset() -> None:
     buffer = InMemoryGenerationBuffer()
     s0 = await buffer.append_token("m", "Hello ")
@@ -60,6 +67,20 @@ async def test_live_subscribe_receives_streamed_tokens() -> None:
 
     await asyncio.wait_for(asyncio.gather(consumer(), producer()), timeout=2.0)
     assert collected == ["a", "b", "c"]
+
+
+async def test_stream_text_tokens_reconstruct_text_exactly() -> None:
+    buffer = InMemoryGenerationBuffer()
+    manager = StreamManager(buffer)
+    text = "It hurts here.\n\nRight here — badly.  Since  Tuesday."
+
+    await manager.stream_text("m-1", text)
+
+    events = await buffer.snapshot("m-1")
+    assert events[-1].type == "complete"
+    tokens = [e.data["token"] for e in events if e.type == "token"]
+    # No trailing pad, no collapsed newlines or double spaces.
+    assert "".join(tokens) == text
 
 
 async def test_run_generation_buffers_provider_stream(fake_provider_cls) -> None:

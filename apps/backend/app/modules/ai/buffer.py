@@ -41,6 +41,12 @@ class GenerationBuffer(Protocol):
         has an active (non-terminal) generation (one active per session)."""
         ...
 
+    async def session_of(self, message_id: str) -> str | None:
+        """The session a generation was begun for (None if unknown/expired).
+        Lets the API enforce that a stream request's message belongs to the
+        session whose ownership it verified."""
+        ...
+
     async def append_token(self, message_id: str, token: str) -> int: ...
 
     async def complete(self, message_id: str, finish_reason: str | None = None) -> None: ...
@@ -79,6 +85,9 @@ class InMemoryGenerationBuffer:
         self._active[session_id] = message_id
         self._session_of[message_id] = session_id
         return True
+
+    async def session_of(self, message_id: str) -> str | None:
+        return self._session_of.get(message_id)
 
     async def _emit(self, message_id: str, etype: str, data: dict[str, str]) -> int:
         events = self._events.setdefault(message_id, [])

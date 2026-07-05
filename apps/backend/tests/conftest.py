@@ -129,6 +129,10 @@ def client(session, monkeypatch):
     monkeypatch.setattr("app.modules.conversation.service.session_scope", _test_scope)
     # The evaluation worker also persists from a background task.
     monkeypatch.setattr("app.modules.evaluation.service.session_scope", _test_scope)
+    # The SSE endpoint (and its detached auth) uses short-lived sessions of its
+    # own so streaming never pins a pooled connection; point those here too.
+    monkeypatch.setattr("app.api.deps.session_scope", _test_scope)
+    monkeypatch.setattr("app.modules.conversation.router.session_scope", _test_scope)
 
     def _db_dep():
         yield session

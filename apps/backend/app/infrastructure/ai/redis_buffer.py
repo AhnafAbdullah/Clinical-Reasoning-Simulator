@@ -40,12 +40,21 @@ class RedisGenerationBuffer:
     def _active_key(session_id: str) -> str:
         return f"gen:active:{session_id}"
 
+    @staticmethod
+    def _owner_key(message_id: str) -> str:
+        return f"gen:{message_id}:session"
+
     async def begin(self, session_id: str, message_id: str) -> bool:
         active = await self._redis.get(self._active_key(session_id))
         if active and not await self._is_done(_as_str(active)):
             return False
         await self._redis.set(self._active_key(session_id), message_id, ex=_TTL_SECONDS)
+        await self._redis.set(self._owner_key(message_id), session_id, ex=_TTL_SECONDS)
         return True
+
+    async def session_of(self, message_id: str) -> str | None:
+        owner = await self._redis.get(self._owner_key(message_id))
+        return _as_str(owner) if owner is not None else None
 
     async def _is_done(self, message_id: str) -> bool:
         last = await self._redis.lindex(self._events_key(message_id), -1)

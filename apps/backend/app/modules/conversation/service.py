@@ -101,16 +101,24 @@ class ConversationService:
                 user_id=str(user_id),
                 message_id=message_id,
             )
+
             # Persist before the completion event so a reconnect always finds the
             # turn already saved (Vol 4D §7). Fresh session: the request's is gone.
-            with session_scope() as db:
-                SqlAlchemyConversationRepository(db).add(
-                    session_id=session.id,
-                    role=MessageRole.PATIENT,
-                    message=result.text,
-                    token_count=result.interaction.completion_tokens,
-                )
+            # In a worker thread — this coroutine shares the event loop with every
+            # active SSE stream, so a sync DB write here would stall all of them.
+            def _persist() -> None:
+                with session_scope() as db:
+                    SqlAlchemyConversationRepository(db).add(
+                        session_id=session.id,
+                        role=MessageRole.PATIENT,
+                        message=result.text,
+                        token_count=result.interaction.completion_tokens,
+                    )
+
+            await asyncio.to_thread(_persist)
             await self.stream.stream_text(message_id, result.text)
-        except Exception as exc:  # generation/validation/persistence failure
+        except Exception:  # generation/validation/persistence failure
             logger.exception("Patient turn failed for message %s", message_id)
-            await self.stream.fail(message_id, str(exc))
+            # The SSE error event reaches the browser — never put raw exception
+            # text (provider URLs, DB errors, prompt internals) on the wire.
+            await self.stream.fail(message_id, "The patient could not respond. Please try again.")

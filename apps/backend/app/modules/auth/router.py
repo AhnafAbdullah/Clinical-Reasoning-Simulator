@@ -1,12 +1,18 @@
-"""Auth endpoints (Vol 5 §8). Responses use the standard envelope."""
+"""Auth endpoints (Vol 5 §8). Responses use the standard envelope.
+
+Register/login/refresh are rate limited per client IP (login additionally
+per email) and run their Argon2 + DB work in a worker thread — password
+hashing is CPU-heavy and must not stall the event loop.
+"""
 
 from __future__ import annotations
 
+import asyncio
 from typing import Any
 
 from fastapi import APIRouter, status
 
-from app.api.deps import CurrentUser, DbDep, RateLimiterDep, SettingsDep
+from app.api.deps import ClientIp, CurrentUser, DbDep, RateLimiterDep, SettingsDep
 from app.api.envelope import ok
 from app.domain.errors import AuthError
 from app.infrastructure.repositories.user_repository import (
@@ -32,39 +38,63 @@ def _token_payload(pair: uc.TokenPair) -> dict[str, Any]:
 
 
 @router.post("/register", status_code=status.HTTP_201_CREATED)
-def register(body: RegisterRequest, db: DbDep) -> dict[str, Any]:
-    users = SqlAlchemyUserRepository(db)
-    tokens = SqlAlchemyRefreshTokenRepository(db)
-    user = uc.register_user(
-        users, email=body.email, password=body.password, display_name=body.display_name
+async def register(
+    body: RegisterRequest, db: DbDep, limiter: RateLimiterDep, settings: SettingsDep, ip: ClientIp
+) -> dict[str, Any]:
+    await limiter.check(
+        "register", ip, limit=settings.rate_limit_register_per_ip_per_hour, window_seconds=3600
     )
-    pair = uc.issue_token_pair(tokens, user)
-    return ok(_token_payload(pair))
+
+    def _register() -> uc.TokenPair:
+        users = SqlAlchemyUserRepository(db)
+        tokens = SqlAlchemyRefreshTokenRepository(db)
+        user = uc.register_user(
+            users, email=body.email, password=body.password, display_name=body.display_name
+        )
+        return uc.issue_token_pair(tokens, user)
+
+    return ok(_token_payload(await asyncio.to_thread(_register)))
 
 
 @router.post("/login")
 async def login(
-    body: LoginRequest, db: DbDep, limiter: RateLimiterDep, settings: SettingsDep
+    body: LoginRequest, db: DbDep, limiter: RateLimiterDep, settings: SettingsDep, ip: ClientIp
 ) -> dict[str, Any]:
+    # Per-email stops brute-forcing one account; per-IP stops spraying one
+    # attempt across many accounts (which never trips the per-email counter).
     await limiter.check(
         "login",
         body.email.lower(),
         limit=settings.rate_limit_login_per_minute,
         window_seconds=60,
     )
-    users = SqlAlchemyUserRepository(db)
-    tokens = SqlAlchemyRefreshTokenRepository(db)
-    user = uc.authenticate(users, email=body.email, password=body.password)
-    pair = uc.issue_token_pair(tokens, user)
-    return ok(_token_payload(pair))
+    await limiter.check(
+        "login_ip", ip, limit=settings.rate_limit_login_per_ip_per_minute, window_seconds=60
+    )
+
+    def _login() -> uc.TokenPair:
+        users = SqlAlchemyUserRepository(db)
+        tokens = SqlAlchemyRefreshTokenRepository(db)
+        user = uc.authenticate(users, email=body.email, password=body.password)
+        return uc.issue_token_pair(tokens, user)
+
+    return ok(_token_payload(await asyncio.to_thread(_login)))
 
 
 @router.post("/refresh")
-def refresh(body: RefreshRequest, db: DbDep) -> dict[str, Any]:
-    users = SqlAlchemyUserRepository(db)
-    tokens = SqlAlchemyRefreshTokenRepository(db)
-    pair = uc.refresh_tokens(users, tokens, refresh_token=body.refresh_token)
-    return ok(_token_payload(pair))
+async def refresh(
+    body: RefreshRequest, db: DbDep, limiter: RateLimiterDep, settings: SettingsDep, ip: ClientIp
+) -> dict[str, Any]:
+    await limiter.check(
+        "refresh", ip, limit=settings.rate_limit_refresh_per_ip_per_minute, window_seconds=60
+    )
+
+    def _refresh() -> uc.TokenPair:
+        users = SqlAlchemyUserRepository(db)
+        tokens = SqlAlchemyRefreshTokenRepository(db)
+        return uc.refresh_tokens(users, tokens, refresh_token=body.refresh_token)
+
+    return ok(_token_payload(await asyncio.to_thread(_refresh)))
 
 
 @router.post("/logout")

@@ -8,7 +8,7 @@ import { ClinicScene, PatientFigure } from "@/app/components/clinic";
 import { SettingsMenu } from "@/app/components/ui";
 import { CommitPanel, ExamPanel, TestsPanel } from "@/app/components/workspace";
 import { useAmbience } from "@/lib/ambience";
-import { api, streamPatientTurn, type MessageItem } from "@/lib/api";
+import { api, ApiError, streamPatientTurn, type MessageItem } from "@/lib/api";
 import { useCinematics } from "@/lib/cinematics";
 import { useSettings } from "@/lib/settings";
 import { useSpeechToText, useTextToSpeech } from "@/lib/voice";
@@ -73,6 +73,7 @@ export function ConsultRoom({
   const [draft, setDraft] = useState("");
   const [live, setLive] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [sendError, setSendError] = useState<string | null>(null);
   const [drawer, setDrawer] = useState(false);
   const [tab, setTab] = useState<Tab>("exam");
 
@@ -99,22 +100,38 @@ export function ConsultRoom({
 
   // Accumulates the patient's streamed reply so we can speak the whole line on done.
   const liveTextRef = useRef("");
+  // Abort the SSE read when a new turn starts or the room unmounts, so a stale
+  // stream can't keep setting state (or hold the connection) after we've left.
+  const streamAbortRef = useRef<AbortController | null>(null);
+  useEffect(() => () => streamAbortRef.current?.abort(), []);
   const streamTurn = useCallback(
     async (messageId: string) => {
+      streamAbortRef.current?.abort();
+      const ctrl = new AbortController();
+      streamAbortRef.current = ctrl;
       setLive("");
       liveTextRef.current = "";
-      await streamPatientTurn(sessionId, messageId, {
-        onToken: (t) => {
-          liveTextRef.current += t;
-          setLive((p) => (p ?? "") + t);
+      await streamPatientTurn(
+        sessionId,
+        messageId,
+        {
+          onToken: (t) => {
+            liveTextRef.current += t;
+            setLive((p) => (p ?? "") + t);
+          },
+          onDone: () => {
+            setLive(null);
+            messages.refetch();
+            if (voice && tts.supported) tts.speak(liveTextRef.current, { gender: patient.data?.gender });
+          },
+          onError: (m) => {
+            setLive(null);
+            messages.refetch(); // whatever was said before the drop is persisted
+            setSendError(m);
+          },
         },
-        onDone: () => {
-          setLive(null);
-          messages.refetch();
-          if (voice && tts.supported) tts.speak(liveTextRef.current, { gender: patient.data?.gender });
-        },
-        onError: () => setLive(null),
-      });
+        { signal: ctrl.signal },
+      );
     },
     [sessionId, messages, voice, tts, patient.data?.gender],
   );
@@ -130,11 +147,20 @@ export function ConsultRoom({
     const text = (spoken ?? draft).trim();
     if (!text || busy) return;
     setBusy(true);
+    setSendError(null);
     setDraft("");
     try {
       const { message_id } = await api.sendMessage(sessionId, text);
       await messages.refetch();
       await streamTurn(message_id);
+    } catch (err) {
+      // The question never reached the patient — put it back, and say why.
+      setDraft((d) => d || text);
+      setSendError(
+        err instanceof ApiError
+          ? err.message
+          : "Couldn't reach the clinic — check your connection and try again.",
+      );
     } finally {
       setBusy(false);
       session.refetch();
@@ -297,7 +323,7 @@ export function ConsultRoom({
                 value={draft}
                 disabled={!working || busy}
                 onChange={(e) => setDraft(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && send()}
+                onKeyDown={(e) => e.key === "Enter" && !e.nativeEvent.isComposing && send()}
               />
               {voiceInput && dictation.supported && (
                 <button
@@ -316,6 +342,11 @@ export function ConsultRoom({
               )}
               <button onClick={() => send()} disabled={!working || busy} className="btn-gold px-6">{busy ? "…" : "Ask"}</button>
             </div>
+            {sendError && (
+              <p className="mt-1.5 px-3 text-center text-xs text-amber-300/90" role="alert">
+                {sendError}
+              </p>
+            )}
             {voiceInput && dictation.supported && dictation.error && micHint(dictation.error) && (
               <p className="mt-1.5 px-3 text-center text-xs text-amber-300/90" role="status">
                 {micHint(dictation.error)}

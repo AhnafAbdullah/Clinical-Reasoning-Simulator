@@ -5,13 +5,17 @@ from __future__ import annotations
 from functools import lru_cache
 from pathlib import Path
 
-from pydantic import Field
+from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Repo root = .../clinical-reasoning-simulator ; this file is apps/backend/app/core/config.py
 REPO_ROOT = Path(__file__).resolve().parents[4]
 CASE_SCHEMA_DIR = REPO_ROOT / "packages" / "case-schema"
 PROMPT_REGISTRY_DIR = REPO_ROOT / "packages" / "prompt-registry"
+
+# Dev-only JWT secret. Any non-development environment MUST override it; the
+# validator below refuses to boot otherwise.
+_DEV_JWT_SECRET = "dev-insecure-secret-change-me-in-production-0123456789"
 
 
 class Settings(BaseSettings):
@@ -63,7 +67,7 @@ class Settings(BaseSettings):
     # ── Auth / JWT (Vol 5 §5) ──────────────────────────────────────────────────
     # Short-lived access token + rotating refresh token (Argon2 password hashing).
     # >= 32 bytes so HS256 is happy; override in every real environment.
-    jwt_secret: str = "dev-insecure-secret-change-me-in-production-0123456789"
+    jwt_secret: str = _DEV_JWT_SECRET
     jwt_algorithm: str = "HS256"
     access_token_ttl_minutes: int = 15
     refresh_token_ttl_days: int = 14
@@ -76,13 +80,29 @@ class Settings(BaseSettings):
     rate_limit_messages_per_minute: int = 20
     rate_limit_sessions_per_hour: int = 30
     rate_limit_investigations_per_minute: int = 30
+    # Login is limited on two axes: per-email stops brute-forcing one account,
+    # per-IP stops spraying one attempt across many accounts.
     rate_limit_login_per_minute: int = 10
+    rate_limit_login_per_ip_per_minute: int = 30
+    rate_limit_register_per_ip_per_hour: int = 10
+    rate_limit_refresh_per_ip_per_minute: int = 30
 
     # Feature flags (Vol 2B §31-32).
     enable_streaming: bool = True
     enable_google_login: bool = False
     enable_evaluation: bool = True
     enable_analytics: bool = False
+
+    @model_validator(mode="after")
+    def _refuse_dev_secrets_outside_development(self) -> "Settings":
+        """Fail at boot, not at exploit time: a deployment that forgot to set a
+        real JWT secret must not come up able to mint forgeable tokens."""
+        if self.environment not in ("development", "test") and self.jwt_secret == _DEV_JWT_SECRET:
+            raise ValueError(
+                "CRS_JWT_SECRET is still the built-in development value; set a strong "
+                f"unique secret when CRS_ENVIRONMENT={self.environment!r}."
+            )
+        return self
 
 
 @lru_cache

@@ -92,6 +92,14 @@ class SqlAlchemyRefreshTokenRepository:
         row = self._s.scalars(stmt).first()
         return row.user_id if row else None
 
+    def get_revoked_owner(self, token_hash: str) -> uuid.UUID | None:
+        stmt = select(m.RefreshToken).where(
+            m.RefreshToken.token_hash == token_hash,
+            m.RefreshToken.revoked_at.is_not(None),
+        )
+        row = self._s.scalars(stmt).first()
+        return row.user_id if row else None
+
     def revoke(self, token_hash: str) -> None:
         stmt = select(m.RefreshToken).where(
             m.RefreshToken.token_hash == token_hash, m.RefreshToken.revoked_at.is_(None)

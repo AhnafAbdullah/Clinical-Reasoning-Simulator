@@ -7,7 +7,7 @@ from __future__ import annotations
 from collections.abc import Iterator
 from typing import Annotated
 
-from fastapi import Depends
+from fastapi import Depends, Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 
@@ -36,6 +36,19 @@ SettingsDep = Annotated[Settings, Depends(get_settings)]
 DbDep = Annotated[Session, Depends(get_db)]
 
 
+def client_ip(request: Request) -> str:
+    """Best-effort client address for rate limiting. Behind nginx the first
+    X-Forwarded-For hop is the real client; the header is spoofable when the
+    API is exposed directly, so treat this as a throttle key, never as auth."""
+    forwarded = request.headers.get("x-forwarded-for")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    return request.client.host if request.client else "unknown"
+
+
+ClientIp = Annotated[str, Depends(client_ip)]
+
+
 def get_current_user(
     db: DbDep,
     credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(_bearer)],
@@ -50,6 +63,26 @@ def get_current_user(
 
 
 CurrentUser = Annotated[User, Depends(get_current_user)]
+
+
+def get_current_user_detached(
+    credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(_bearer)],
+) -> User:
+    """Authenticate with a short-lived DB session of our own instead of the
+    request-scoped ``get_db`` one. Streaming endpoints must use this: a yield-dep
+    session is only released after the response body finishes, so with ``get_db``
+    every open SSE connection would pin a pooled DB connection for its lifetime."""
+    if credentials is None:
+        raise TokenError("Missing bearer token.")
+    claims = decode_access_token(credentials.credentials)
+    with session_scope() as db:
+        user = SqlAlchemyUserRepository(db).get(claims.user_id)
+    if user is None or not user.is_active:
+        raise InvalidCredentialsError("User no longer exists or is inactive.")
+    return user
+
+
+CurrentUserDetached = Annotated[User, Depends(get_current_user_detached)]
 
 
 def require_admin(user: CurrentUser) -> User:

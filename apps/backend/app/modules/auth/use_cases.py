@@ -95,6 +95,13 @@ def refresh_tokens(
     token_hash = hash_refresh_token(refresh_token)
     user_id = tokens.get_active(token_hash)
     if user_id is None:
+        # Reuse detection: rotation revokes each token as it is spent, so a
+        # *revoked* token coming back means it was stolen (either the thief or
+        # the victim is now replaying). Kill the whole family so the stolen
+        # session dies too; the legitimate user just logs in again.
+        owner = tokens.get_revoked_owner(token_hash)
+        if owner is not None:
+            tokens.revoke_all_for_user(owner)
         raise TokenError("Refresh token is invalid, expired, or already used.")
     user = users.get(user_id)
     if user is None or not user.is_active:

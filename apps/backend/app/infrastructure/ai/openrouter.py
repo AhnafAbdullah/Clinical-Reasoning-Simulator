@@ -57,8 +57,23 @@ class OpenRouterProvider:
 
     name = "openrouter"
 
-    def __init__(self, settings: Settings | None = None) -> None:
+    def __init__(
+        self, settings: Settings | None = None, client: httpx.AsyncClient | None = None
+    ) -> None:
         self._settings = settings or get_settings()
+        self._client = client
+
+    def _http(self) -> httpx.AsyncClient:
+        """One shared client for the provider's lifetime: connection + TLS reuse
+        across turns instead of a fresh handshake per LLM call."""
+        if self._client is None:
+            self._client = httpx.AsyncClient(timeout=self._settings.llm_timeout_seconds)
+        return self._client
+
+    async def aclose(self) -> None:
+        if self._client is not None:
+            await self._client.aclose()
+            self._client = None
 
     def _headers(self) -> dict[str, str]:
         if not self._settings.openrouter_api_key:
@@ -76,12 +91,11 @@ class OpenRouterProvider:
 
     async def generate(self, request: LLMRequest) -> LLMResponse:
         try:
-            async with httpx.AsyncClient(timeout=self._settings.llm_timeout_seconds) as client:
-                resp = await client.post(
-                    self._url, headers=self._headers(), json=_to_payload(request, stream=False)
-                )
-                resp.raise_for_status()
-                data = resp.json()
+            resp = await self._http().post(
+                self._url, headers=self._headers(), json=_to_payload(request, stream=False)
+            )
+            resp.raise_for_status()
+            data = resp.json()
         except httpx.HTTPError as exc:
             raise ProviderError(f"OpenRouter request failed: {exc}") from exc
 
@@ -102,20 +116,19 @@ class OpenRouterProvider:
 
     async def stream(self, request: LLMRequest) -> AsyncIterator[StreamChunk]:
         try:
-            async with httpx.AsyncClient(timeout=self._settings.llm_timeout_seconds) as client:
-                async with client.stream(
-                    "POST",
-                    self._url,
-                    headers=self._headers(),
-                    json=_to_payload(request, stream=True),
-                ) as resp:
-                    resp.raise_for_status()
-                    async for line in resp.aiter_lines():
-                        chunk = self._parse_sse_line(line)
-                        if chunk is not None:
-                            yield chunk
-                            if chunk.done:
-                                return
+            async with self._http().stream(
+                "POST",
+                self._url,
+                headers=self._headers(),
+                json=_to_payload(request, stream=True),
+            ) as resp:
+                resp.raise_for_status()
+                async for line in resp.aiter_lines():
+                    chunk = self._parse_sse_line(line)
+                    if chunk is not None:
+                        yield chunk
+                        if chunk.done:
+                            return
         except httpx.HTTPError as exc:
             raise ProviderError(f"OpenRouter stream failed: {exc}") from exc
 
@@ -146,12 +159,12 @@ class OpenRouterProvider:
         if not self._settings.openrouter_api_key:
             return False
         try:
-            async with httpx.AsyncClient(timeout=10.0) as client:
-                resp = await client.get(
-                    f"{self._settings.openrouter_base_url.rstrip('/')}/models",
-                    headers=self._headers(),
-                )
-                return resp.status_code == 200
+            resp = await self._http().get(
+                f"{self._settings.openrouter_base_url.rstrip('/')}/models",
+                headers=self._headers(),
+                timeout=10.0,
+            )
+            return resp.status_code == 200
         except httpx.HTTPError:
             return False
 

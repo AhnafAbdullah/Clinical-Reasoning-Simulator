@@ -20,6 +20,12 @@ async def test_one_active_generation_per_session(buffer: RedisGenerationBuffer) 
     assert await buffer.begin("s1", "m3") is True
 
 
+async def test_session_of_maps_generation_to_its_session(buffer: RedisGenerationBuffer) -> None:
+    await buffer.begin("s1", "m1")
+    assert await buffer.session_of("m1") == "s1"
+    assert await buffer.session_of("unknown") is None
+
+
 async def test_append_complete_and_resume(buffer: RedisGenerationBuffer) -> None:
     await buffer.begin("s1", "m1")
     s0 = await buffer.append_token("m1", "Hello ")

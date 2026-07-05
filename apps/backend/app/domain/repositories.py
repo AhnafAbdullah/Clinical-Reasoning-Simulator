@@ -40,6 +40,15 @@ class RefreshTokenRepository(Protocol):
         """Return the owning user id for a non-revoked, unexpired token, else None."""
         ...
 
+    def get_revoked_owner(self, token_hash: str) -> uuid.UUID | None:
+        """Return the owning user id if this token exists but was revoked.
+
+        Rotation means a legitimate client never presents a token twice, so a
+        replayed revoked token is evidence of theft; the caller revokes the
+        user's whole token family. Merely *expired* tokens are not reported —
+        an old client retrying is benign, not an attack."""
+        ...
+
     def revoke(self, token_hash: str) -> None: ...
 
     def revoke_all_for_user(self, user_id: uuid.UUID) -> None: ...

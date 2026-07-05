@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 from collections.abc import AsyncIterator
 
 from app.domain.ai import LLMProvider, LLMRequest
@@ -43,6 +44,10 @@ class StreamManager:
         """Reserve the single active generation slot for a session."""
         return await self.buffer.begin(session_id, message_id)
 
+    async def session_of(self, message_id: str) -> str | None:
+        """The session a generation belongs to (None if unknown/expired)."""
+        return await self.buffer.session_of(message_id)
+
     async def run_generation(
         self, provider: LLMProvider, request: LLMRequest, message_id: str
     ) -> str:
@@ -62,14 +67,20 @@ class StreamManager:
             raise
         return "".join(parts)
 
+    # Split at each whitespace→non-whitespace boundary: every chunk keeps its own
+    # trailing separators (spaces, newlines), so joining the tokens reproduces the
+    # text exactly — no padded trailing space, no collapsed blank lines.
+    _WORD_BOUNDARY = re.compile(r"(?<=\s)(?=\S)")
+
     async def stream_text(self, message_id: str, text: str) -> None:
         """Emit an already-decided response into the buffer word-by-word.
 
         Per Vol 4A §16 the business decision (generation + validation) completes
         before streaming; this only *delivers* the settled tokens, which keeps
         validation off the token path and makes the stream trivially resumable."""
-        for word in text.split(" "):
-            await self.buffer.append_token(message_id, word + " ")
+        for chunk in self._WORD_BOUNDARY.split(text):
+            if chunk:
+                await self.buffer.append_token(message_id, chunk)
         await self.buffer.complete(message_id)
 
     async def fail(self, message_id: str, error: str) -> None:

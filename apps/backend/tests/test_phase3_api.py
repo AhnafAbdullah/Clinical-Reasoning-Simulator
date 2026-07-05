@@ -49,6 +49,26 @@ def test_login_and_refresh_rotation(client) -> None:
     assert reuse.status_code == 401
 
 
+def test_refresh_reuse_revokes_the_whole_family(client) -> None:
+    """Replaying a spent token is theft evidence: every descendant dies too."""
+    client.post(
+        "/api/v1/auth/register", json={"email": "victim@example.com", "password": "password1234"}
+    )
+    login = client.post(
+        "/api/v1/auth/login", json={"email": "victim@example.com", "password": "password1234"}
+    )
+    stolen = login.json()["data"]["refresh_token"]
+
+    # Legitimate client rotates; the thief then replays the old token.
+    rotated = client.post("/api/v1/auth/refresh", json={"refresh_token": stolen})
+    assert rotated.status_code == 200
+    current = rotated.json()["data"]["refresh_token"]
+    assert client.post("/api/v1/auth/refresh", json={"refresh_token": stolen}).status_code == 401
+
+    # The reuse killed the family: even the still-fresh rotated token is dead.
+    assert client.post("/api/v1/auth/refresh", json={"refresh_token": current}).status_code == 401
+
+
 def test_protected_endpoint_requires_token(client) -> None:
     assert client.get("/api/v1/auth/me").status_code == 401
     assert client.get("/api/v1/sessions").status_code == 401
@@ -160,6 +180,63 @@ def test_send_message_accepts_and_records(client, auth_headers, published_case_i
         "data"
     ]
     assert any(m["role"] == "student" for m in messages)
+
+
+def test_stream_delivers_patient_reply(client, auth_headers, published_case_id) -> None:
+    session_id = _start_session(client, auth_headers, published_case_id)
+    accepted = client.post(
+        f"/api/v1/sessions/{session_id}/messages",
+        json={"message": "How long have you had the pain?"},
+        headers=auth_headers,
+    )
+    message_id = accepted.json()["data"]["message_id"]
+
+    with client.stream(
+        "GET",
+        f"/api/v1/sessions/{session_id}/stream?message_id={message_id}",
+        headers=auth_headers,
+    ) as s:
+        assert s.status_code == 200
+        body = "".join(s.iter_text())
+    assert "event: token" in body
+    assert "event: complete" in body
+
+
+def test_stream_rejects_message_from_another_session(
+    client, auth_headers, published_case_id
+) -> None:
+    """Owning *a* session must not grant access to another session's generation."""
+    session_id = _start_session(client, auth_headers, published_case_id)
+    accepted = client.post(
+        f"/api/v1/sessions/{session_id}/messages",
+        json={"message": "How long have you had the pain?"},
+        headers=auth_headers,
+    )
+    victim_message_id = accepted.json()["data"]["message_id"]
+
+    other_headers = {
+        "Authorization": "Bearer "
+        + client.post(
+            "/api/v1/auth/register",
+            json={"email": "eaves@example.com", "password": "password1234"},
+        ).json()["data"]["access_token"]
+    }
+    other_session_id = _start_session(client, other_headers, published_case_id)
+
+    resp = client.get(
+        f"/api/v1/sessions/{other_session_id}/stream?message_id={victim_message_id}",
+        headers=other_headers,
+    )
+    assert resp.status_code == 404
+
+
+def test_stream_unknown_message_id_404(client, auth_headers, published_case_id) -> None:
+    session_id = _start_session(client, auth_headers, published_case_id)
+    resp = client.get(
+        f"/api/v1/sessions/{session_id}/stream?message_id=no-such-generation",
+        headers=auth_headers,
+    )
+    assert resp.status_code == 404
 
 
 # ── Physical examination ─────────────────────────────────────────────────────────
