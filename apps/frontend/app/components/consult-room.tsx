@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, type CSSProperties, type RefObject } from "react";
 
 import { ClinicScene, PatientFigure } from "@/app/components/clinic";
@@ -10,6 +11,7 @@ import { CommitPanel, ExamPanel, TestsPanel } from "@/app/components/workspace";
 import { useAmbience } from "@/lib/ambience";
 import { api, ApiError, streamPatientTurn, type MessageItem } from "@/lib/api";
 import { useCinematics } from "@/lib/cinematics";
+import { useCaseNotes } from "@/lib/notes";
 import { useSettings } from "@/lib/settings";
 import { useSpeechToText, useTextToSpeech } from "@/lib/voice";
 
@@ -64,6 +66,12 @@ export function ConsultRoom({
   const reduce = !motionOn; // settings drive animation; user choice overrides OS hint
   useAmbience(sound);
   const tts = useTextToSpeech();
+  const router = useRouter();
+
+  // The student's SOAP clipboard — drafted during the consult, carried into
+  // the commit panel (Assessment → differential, Plan → management).
+  const { notes, update: updateNotes, hasContent: hasNotes } = useCaseNotes(sessionId);
+  const [showNotes, setShowNotes] = useState(false);
 
   const session = useQuery({ queryKey: ["session", sessionId], queryFn: () => api.getSession(sessionId) });
   const messages = useQuery({ queryKey: ["messages", sessionId], queryFn: () => api.listMessages(sessionId) });
@@ -83,6 +91,7 @@ export function ConsultRoom({
   const tourInputRef = useRef<HTMLDivElement>(null);
   const tourWorkspaceRef = useRef<HTMLButtonElement>(null);
   const tourControlsRef = useRef<HTMLDivElement>(null);
+  const tourNotesRef = useRef<HTMLButtonElement>(null);
 
   // Walk-in cinematic on mount.
   useEffect(() => {
@@ -217,6 +226,12 @@ export function ConsultRoom({
       place: "top",
     },
     {
+      ref: tourNotesRef,
+      title: "Your clipboard",
+      body: "Jot SOAP notes as you go — Subjective, Objective, Assessment, Plan. Your Assessment and Plan carry straight into the commit form, so draft your differential during the history.",
+      place: "bottom",
+    },
+    {
       ref: tourWorkspaceRef,
       title: "Examine & submit here",
       body: "Open the Workspace to examine the patient, order tests, and commit your diagnosis & management — this is where you submit your solution.",
@@ -284,6 +299,22 @@ export function ConsultRoom({
             {typeof streak === "number" && streak > 0 && (
               <span className="rounded-full border border-gold/40 bg-navy/40 px-3 py-1 text-sm text-gold-soft backdrop-blur">🔥 {streak}</span>
             )}
+            <button
+              ref={tourNotesRef}
+              onClick={() => setShowNotes((v) => !v)}
+              aria-pressed={showNotes}
+              title={showNotes ? "Close your clipboard" : "Open your clipboard (SOAP notes)"}
+              className={`relative rounded-full border px-2.5 py-1 text-sm backdrop-blur transition-colors ${
+                showNotes
+                  ? "border-gold bg-gold/20 text-gold-soft"
+                  : "border-cream-card/20 bg-navy/40 text-cream-card/80 hover:text-cream-card"
+              }`}
+            >
+              📋
+              {hasNotes && !showNotes && (
+                <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-gold" aria-hidden />
+              )}
+            </button>
             <button
               onClick={() => setShowTour(true)}
               title="Replay the tour"
@@ -355,6 +386,37 @@ export function ConsultRoom({
           </div>
         </div>
 
+        {/* Clipboard — SOAP notes, non-modal so you can write while talking */}
+        <AnimatePresence>
+          {showNotes && (
+            <motion.aside
+              initial={reduce ? false : { x: 40, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={reduce ? { opacity: 0 } : { x: 40, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 320, damping: 32 }}
+              className="absolute bottom-24 right-3 top-14 z-20 flex w-72 flex-col rounded-xl2 border border-line bg-cream-card/95 shadow-lift backdrop-blur"
+              aria-label="Clipboard — SOAP notes"
+            >
+              <div className="flex items-center justify-between border-b border-line px-3 py-2">
+                <div className="flex items-center gap-2">
+                  <span className="gold-strip w-6" />
+                  <h3 className="text-xs font-semibold uppercase tracking-wide text-ink-soft">Clipboard</h3>
+                </div>
+                <button onClick={() => setShowNotes(false)} className="text-ink-soft hover:text-navy" aria-label="Close clipboard">✕</button>
+              </div>
+              <div className="flex min-h-0 flex-1 flex-col gap-2 p-3">
+                <NoteField label="S — Subjective" hint="What the patient tells you" value={notes.s} onChange={(v) => updateNotes("s", v)} />
+                <NoteField label="O — Objective" hint="Findings, vitals, results" value={notes.o} onChange={(v) => updateNotes("o", v)} />
+                <NoteField label="A — Assessment" hint="Differential — one per line" value={notes.a} onChange={(v) => updateNotes("a", v)} />
+                <NoteField label="P — Plan" hint="Management thoughts" value={notes.p} onChange={(v) => updateNotes("p", v)} />
+              </div>
+              <p className="border-t border-line px-3 py-1.5 text-[10px] text-ink-soft">
+                Assessment &amp; Plan carry into the commit form.
+              </p>
+            </motion.aside>
+          )}
+        </AnimatePresence>
+
         {/* Workspace drawer */}
         <AnimatePresence>
           {drawer && (
@@ -381,7 +443,16 @@ export function ConsultRoom({
                 <div className="min-h-0 flex-1 overflow-y-auto p-4">
                   {tab === "exam" && <ExamPanel id={sessionId} working={working} />}
                   {tab === "tests" && <TestsPanel id={sessionId} working={working} />}
-                  {tab === "commit" && <CommitPanel id={sessionId} stage={stage} status={sstatus} onChange={() => session.refetch()} />}
+                  {tab === "commit" && (
+                    <CommitPanel
+                      id={sessionId}
+                      stage={stage}
+                      status={sstatus}
+                      onChange={() => session.refetch()}
+                      initialDifferentials={notes.a}
+                      initialPlan={notes.p}
+                    />
+                  )}
                 </div>
               </motion.aside>
             </>
@@ -389,9 +460,61 @@ export function ConsultRoom({
         </AnimatePresence>
       </motion.div>
 
+      {/* Consultation over → the story continues in the debrief */}
+      {(sstatus === "EVALUATING" || sstatus === "COMPLETED") && (
+        <div className="pointer-events-none absolute inset-0 z-40 grid place-items-center p-6">
+          <motion.div
+            initial={reduce ? false : { opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            className="pointer-events-auto max-w-sm rounded-xl2 border border-line bg-cream-card p-5 text-center shadow-lift"
+          >
+            <span className="gold-strip mx-auto mb-3 block w-10" />
+            <h3 className="font-display text-lg font-semibold text-navy">Consultation complete</h3>
+            <p className="mt-1 text-sm text-ink-soft">
+              {sstatus === "EVALUATING"
+                ? "Your consultant is reviewing the case."
+                : "Your report is ready."}
+            </p>
+            <div className="mt-4 flex justify-center gap-2">
+              <button onClick={() => router.push(`/sessions/${sessionId}/debrief`)} className="btn-gold px-5 py-2 text-sm">
+                View debrief →
+              </button>
+              <button onClick={() => { tts.cancel(); onExit(); }} className="btn-ghost px-4 py-2 text-sm">
+                Leave
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
       {/* First-run guided tour overlay */}
       <AnimatePresence>{showTour && <RoomTour steps={tourSteps} onClose={finishTour} />}</AnimatePresence>
     </div>
+  );
+}
+
+function NoteField({
+  label,
+  hint,
+  value,
+  onChange,
+}: {
+  label: string;
+  hint: string;
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <label className="flex min-h-0 flex-1 flex-col">
+      <span className="mb-0.5 text-[10px] font-semibold uppercase tracking-wide text-ink-soft">{label}</span>
+      <textarea
+        className="min-h-0 flex-1 resize-none rounded-lg border border-line bg-cream px-2 py-1.5 text-xs text-ink placeholder:text-ink-soft/60 focus:border-gold focus:outline-none"
+        placeholder={hint}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+      />
+    </label>
   );
 }
 

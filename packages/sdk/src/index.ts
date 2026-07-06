@@ -162,6 +162,41 @@ export interface DailyStart {
   resumed: boolean;
   streak: number;
 }
+export interface DebriefRubricItem {
+  id: string;
+  description: string;
+  message_id?: string | null;
+}
+export interface DebriefInvestigation {
+  name: string;
+  outcome: string;
+  indicated: boolean | null;
+  significance: string | null;
+  interpretation: string | null;
+  result: string | null;
+}
+export interface DebriefTranscriptTurn {
+  id: string;
+  role: string;
+  message: string;
+  highlights: string[];
+}
+export interface Debrief {
+  case: { title: string; specialty: string; difficulty: string };
+  reveal: { diagnosis: string; explanation: string; differentials: string[] };
+  student: { diagnosis: string; differentials: string[]; plan: string; verdict: "correct" | "close" | "missed" };
+  scores: { overall: number; sections: Record<string, number>; differential: number; efficiency: number };
+  history: { asked: DebriefRubricItem[]; missed: DebriefRubricItem[] };
+  investigations: { ordered: DebriefInvestigation[]; missed: { name: string; significance: string | null }[] };
+  management: {
+    done: string[];
+    missed: string[];
+    ideal: { emergency: string[]; definitive: string[]; follow_up: string[]; patient_education: string[] };
+  };
+  teaching: { pearls: string[]; pitfalls: string[]; learning_objectives: string[]; references: string[] };
+  transcript: DebriefTranscriptTurn[];
+  generated_at: string | null;
+}
 
 // ── Endpoints ──────────────────────────────────────────────────────────────────
 export const api = {
@@ -241,6 +276,8 @@ export const api = {
     }),
   getEvaluation: (id: string) =>
     request<Evaluation | { status: string }>(`/api/v1/sessions/${id}/evaluation`),
+  getDebrief: (id: string) =>
+    request<Debrief | { status: string }>(`/api/v1/sessions/${id}/debrief`),
 
   // analytics
   analytics: () => request<Analytics>("/api/v1/users/me/analytics"),

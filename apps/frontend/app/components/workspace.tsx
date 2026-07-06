@@ -1,10 +1,10 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { ScoreBar } from "@/app/components/ui";
-import { api, ApiError, type Evaluation, type InvestigationResult } from "@/lib/api";
+import { api, ApiError, type InvestigationResult } from "@/lib/api";
 
 export const EXAM_SYSTEMS = [
   "general",
@@ -117,15 +117,21 @@ export function CommitPanel({
   stage,
   status,
   onChange,
+  initialDifferentials = "",
+  initialPlan = "",
 }: {
   id: string;
   stage: string;
   status: string;
   onChange: () => void;
+  /** Drafts carried in from the clipboard notes (Assessment / Plan). */
+  initialDifferentials?: string;
+  initialPlan?: string;
 }) {
-  const [differentials, setDifferentials] = useState("");
+  const router = useRouter();
+  const [differentials, setDifferentials] = useState(initialDifferentials);
   const [diagnosis, setDiagnosis] = useState("");
-  const [plan, setPlan] = useState("");
+  const [plan, setPlan] = useState(initialPlan);
   const [err, setErr] = useState<string | null>(null);
 
   const order = ["GREETING", "HISTORY", "PHYSICAL_EXAM", "INVESTIGATIONS", "DIFFERENTIAL", "FINAL_DIAGNOSIS", "MANAGEMENT"];
@@ -142,11 +148,25 @@ export function CommitPanel({
     }
   }
 
-  if (evaluating) return <EvaluationPanel id={id} />;
+  if (evaluating) {
+    return (
+      <div className="grid place-items-center gap-3 py-10 text-center">
+        <p className="text-sm text-ink-soft">The consultation is closed.</p>
+        <button onClick={() => router.push(`/sessions/${id}/debrief`)} className="btn-gold px-5 py-2">
+          View your debrief →
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-5 text-sm">
       {err && <p className="rounded-lg bg-amber-50 px-3 py-2 text-amber-800">{err}</p>}
+      {(initialDifferentials || initialPlan) && (
+        <p className="rounded-lg bg-cream-deep px-3 py-2 text-xs text-ink-soft">
+          📋 Drafts pulled in from your clipboard notes — edit freely before locking.
+        </p>
+      )}
 
       <Step n={1} title="Ranked differential" done={reached("FINAL_DIAGNOSIS")}>
         <textarea className="input" rows={3} placeholder="One diagnosis per line, most likely first"
@@ -170,9 +190,17 @@ export function CommitPanel({
       <Step n={3} title="Management plan" locked={!reached("MANAGEMENT")}>
         <textarea className="input" rows={4} value={plan} disabled={!reached("MANAGEMENT")}
           onChange={(e) => setPlan(e.target.value)} placeholder="Your management plan…" />
-        <button disabled={!reached("MANAGEMENT")} onClick={() => run(() => api.submitManagement(id, plan.trim()))}
-          className="btn-gold mt-2">
-          Submit &amp; get report
+        <button
+          disabled={!reached("MANAGEMENT")}
+          onClick={() =>
+            run(async () => {
+              await api.submitManagement(id, plan.trim());
+              router.push(`/sessions/${id}/debrief`);
+            })
+          }
+          className="btn-gold mt-2"
+        >
+          Submit &amp; get your debrief
         </button>
       </Step>
     </div>
@@ -193,50 +221,3 @@ function Step({ n, title, children, done, locked }: { n: number; title: string; 
   );
 }
 
-export function EvaluationPanel({ id }: { id: string }) {
-  const evaluation = useQuery({
-    queryKey: ["evaluation", id],
-    queryFn: () => api.getEvaluation(id),
-    refetchInterval: (q) => ((q.state.data as { status?: string } | undefined)?.status === "PENDING" ? 2500 : false),
-  });
-  const data = evaluation.data as Evaluation | { status: string } | undefined;
-
-  if (!data || "status" in data) {
-    return (
-      <div className="grid place-items-center gap-3 py-10 text-center">
-        <span className="h-5 w-5 animate-spin rounded-full border-2 border-line border-t-navy" />
-        <p className="text-sm text-ink-soft">Your consultant is reviewing the case…</p>
-      </div>
-    );
-  }
-
-  const fb = data.feedback as { strengths?: string[]; weaknesses?: string[]; teaching_points?: string[] };
-  const tone = data.overall_score >= 75 ? "text-emerald-700" : data.overall_score >= 50 ? "text-amber-700" : "text-rose-700";
-  return (
-    <div className="space-y-5 text-sm">
-      <div className="card-gold grid place-items-center p-5 text-center">
-        <div className={`font-display text-5xl font-bold ${tone}`}>{data.overall_score}</div>
-        <div className="text-xs uppercase tracking-wide text-ink-soft">Overall score</div>
-      </div>
-      <div className="space-y-2.5">
-        {Object.entries(data.section_scores).map(([k, v]) => <ScoreBar key={k} label={k} value={v} />)}
-        <ScoreBar label="differential" value={data.differential_score} />
-        <ScoreBar label="efficiency" value={data.efficiency_score} />
-      </div>
-      {fb.strengths?.length ? <FeedbackList title="Strengths" items={fb.strengths} tone="text-emerald-700" /> : null}
-      {fb.weaknesses?.length ? <FeedbackList title="To improve" items={fb.weaknesses} tone="text-amber-700" /> : null}
-      {fb.teaching_points?.length ? <FeedbackList title="Teaching points" items={fb.teaching_points} tone="text-navy" /> : null}
-    </div>
-  );
-}
-
-function FeedbackList({ title, items, tone }: { title: string; items: string[]; tone: string }) {
-  return (
-    <div>
-      <h4 className={`font-display font-semibold ${tone}`}>{title}</h4>
-      <ul className="mt-1 list-inside list-disc space-y-0.5 text-ink-soft">
-        {items.map((it, i) => <li key={i}>{it}</li>)}
-      </ul>
-    </div>
-  );
-}

@@ -21,6 +21,7 @@ from app.modules.cases.router import router as cases_router
 from app.modules.commitments.router import router as commitments_router
 from app.modules.conversation.router import router as conversation_router
 from app.modules.daily.router import router as daily_router
+from app.modules.debrief.router import router as debrief_router
 from app.modules.investigations.router import (
     catalog_router as investigations_catalog_router,
     session_router as investigations_session_router,
@@ -54,6 +55,7 @@ app.include_router(cases_router)
 app.include_router(sessions_router)
 app.include_router(conversation_router)
 app.include_router(commitments_router)
+app.include_router(debrief_router)
 app.include_router(investigations_catalog_router)
 app.include_router(investigations_session_router)
 app.include_router(analytics_router)

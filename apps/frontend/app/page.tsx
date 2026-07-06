@@ -122,13 +122,23 @@ export default function Dashboard() {
                   className="card flex items-center justify-between gap-3 px-4 py-3 transition-shadow hover:shadow-lift"
                 >
                   <button
-                    onClick={() => router.push(`/sessions/${s.session_id}`)}
+                    onClick={() =>
+                      router.push(
+                        s.status === "COMPLETED"
+                          ? `/sessions/${s.session_id}/debrief`
+                          : `/sessions/${s.session_id}`,
+                      )
+                    }
                     className="flex flex-1 items-center justify-between gap-3 text-left"
                   >
                     <span className="text-sm text-ink">
                       Session <span className="font-mono text-ink-soft">{s.session_id.slice(0, 8)}</span> · {s.difficulty}
                     </span>
-                    <span className="chip-navy">{s.status} · {s.current_stage}</span>
+                    {s.status === "COMPLETED" ? (
+                      <span className="chip-gold">View debrief →</span>
+                    ) : (
+                      <span className="chip-navy">{s.status} · {s.current_stage}</span>
+                    )}
                   </button>
                   <button
                     onClick={() => remove(s.session_id)}
